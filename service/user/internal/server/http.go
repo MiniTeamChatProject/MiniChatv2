@@ -1,3 +1,5 @@
+//path: ./user/service/http.go 
+
 package server
 
 import (
@@ -11,7 +13,8 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *http.Server {
+// 注意参数：注入 *service.RegistrationService
+func NewHTTPServer(c *conf.Server, greeter *service.RegistrationService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -27,6 +30,10 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterGreeterHTTPServer(srv, greeter)
+	
+	// 注册服务：把我们的实现注册到 HTTP 服务器上
+	// 注意函数名变了：RegisterRegistrationHTTPServer
+	v1.RegisterRegistrationHTTPServer(srv, greeter)
+	
 	return srv
 }

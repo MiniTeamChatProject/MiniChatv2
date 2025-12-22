@@ -1,0 +1,76 @@
+// 路径： ./registraion/api/helloworld/v1/registration
+syntax = "proto3";
+
+// 包名是服务名
+package api.registration.v1;
+
+import "google/api/annotations.proto";
+
+// 2. go_package 路径非常重要！
+// 格式是：项目模块名/api目录/版本;版本号
+// 假设你的项目模块名是 "registration" (可以看根目录 go.mod 第一行)
+option go_package = "user/api/helloworld/v1;v1";
+
+// 3. 定义 Java 包名 (可选，如果不跨语言可以不管，留着也行)
+option java_multiple_files = true;
+option java_package = "api.registration.v1";
+
+// 4. 定义服务
+service Registration {
+  // 注册接口
+  rpc Register (RegisterReq) returns (RegisterReply) {
+    option (google.api.http) = {
+      post: "/register"   // HTTP 请求路径
+      body: "*"
+    };
+  }
+
+  // 登录接口
+  rpc Login (LoginReq) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/login"
+      body: "*"
+    };
+  }
+  
+  // 获取用户信息接口
+  rpc GetProfile (GetProfileReq) returns (GetProfileReply) {
+     option (google.api.http) = {
+      get: "/user/profile"
+    };
+  }
+}
+
+// 5. 定义数据结构 (Message)
+
+message RegisterReq {
+  string username = 1;
+  string password = 2;
+  string nickname = 3;
+}
+
+message RegisterReply {
+  string msg = 1;
+  // 这里可以返回注册后的用户ID等
+}
+
+message LoginReq {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginReply {
+  string msg = 1;
+  string token = 2;
+}
+
+message GetProfileReq {
+    // 不需要参数，token 会在 header 里，由中间件处理
+    // 但 Proto 定义通常不能为空，所以这里留空或者放一个 id
+    int64 id = 1; 
+}
+
+message GetProfileReply {
+    string username = 1;
+    string nickname = 2;
+}
