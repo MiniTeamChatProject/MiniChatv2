@@ -11,7 +11,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.0
 // - protoc             v3.21.12
-// source: api/helloworld/v1/registration.proto
+// source: helloworld/v1/registration.proto
 
 //package name is api.registraion.v1
 
@@ -298,5 +298,5 @@ var Registration_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/helloworld/v1/registration.proto",
+	Metadata: "helloworld/v1/registration.proto",
 }

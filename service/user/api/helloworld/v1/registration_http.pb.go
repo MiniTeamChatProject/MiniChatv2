@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.9.2
 // - protoc             v3.21.12
-// source: api/helloworld/v1/registration.proto
+// source: helloworld/v1/registration.proto
 
 package v1
 

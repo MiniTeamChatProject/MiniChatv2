@@ -1,6 +1,12 @@
 ## USER-REGISTRATION for MiniChatGroup
 *Writer: Jonas Peng ; Contact: jonaspong@outlook.com ; Github: jonas-peng*
 
+**请检查 README_CN.md 以获取中文版！！**
+
+* You can get a text example, please check **Test_Examples.txt**, you can copy commands on the Linux terminal to test whether my micro-service works well.
+
+* if you need develope another micro-service or a front end, please check **For_Other_Microservices_and_FrontEnd_Developement.txt** for details.
+ 
 ### 1, Overview
 This is a readme file for microservice as a part for a project named MiniChatGroup as a little try for the first cooperation of our team.
 

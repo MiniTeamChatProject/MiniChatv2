@@ -1,26 +1,20 @@
-# 使用官方 Go 镜像作为基础（包含完整的 Go 编译器）
-# Go mirror is in need to configure with compelete compiler 
-#FROM golang:1.24
-#国内也下载不了GO 
-FROM docker.m.daocloud.io/library/golang:1.24
-# 1. 设置环境变量
-# 开启 Module 模式，并配置国内代理（加速下载）
-# 1, Set up enviroment path; then open Module mode, this confiuration has been set for China, please chage it if you are out of China 
+# ==========================================
+# 第一阶段：构建环境 (Builder)
+# 使用 Go 1.24 解决版本依赖问题
+# ==========================================
+FROM docker.m.daocloud.io/library/golang:1.24 AS builder
+
+# 1. 设置环境变量 (开启 Module，配置国内七牛云代理加速)
 ENV GO111MODULE=on \
-    GOPROXY=https://goproxy.cn,direct \ 
+    GOPROXY=https://goproxy.cn,direct \
     CGO_ENABLED=0
 
-# 2. 安装系统级依赖
-# 主要是 Protobuf 编译器，Kratos 生成代码需要它
-#2, install system dependencies, mainly compiler of Protobuf wihch Kratos need to generate codes
+# 2. 安装系统级依赖 (Protoc 编译器)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     protobuf-compiler \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. 安装 Go 开发工具链 (Kratos, Wire, Protoc Plugins)
-# 这样组员不需要在本地安装这些，容器里都有
-#3, install developing chains for Go, such as Kratos, Wire and Plugins, which woulb be set up fine in the container
-
+# 3. 安装 Go 开发工具链 (方便队友进入容器维护)
 RUN go install github.com/go-kratos/kratos/cmd/kratos/v2@latest && \
     go install github.com/google/wire/cmd/wire@latest && \
     go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
@@ -29,17 +23,40 @@ RUN go install github.com/go-kratos/kratos/cmd/kratos/v2@latest && \
     go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 
 # 4. 设置工作目录
-#4, set working path
+WORKDIR /src
+
+# 5. 预下载依赖 (利用 Docker 缓存层)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# 6. 复制代码并编译
+COPY . .
+RUN go build -o /bin/server ./cmd/user
+
+# ==========================================
+# 第二阶段：运行环境 (Runner)
+# 极简镜像
+# ==========================================
+FROM docker.m.daocloud.io/library/debian:stable-slim
+
+# 安装基础证书
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates netbase && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# 5. 这一步很关键：
-# 我们不在这里 COPY 代码，而是通过 Docker Compose 的 "挂载" (Volume) 功能
-# 让容器直接读取你硬盘上的代码。这样你修改本地代码，容器里也会跟着变。
-#5, Attention
-# Docker Compose will read codes through a function of volume, instead of copying codes directly. Once you change codes in the local, that in the container would change along with it  
+# 1. 复制编译好的二进制程序
+COPY --from=builder /bin/server ./
 
+# 2. 复制配置文件 (确保路径正确)
+COPY --from=builder /src/configs ./configs
 
-# 6. 容器启动时默认执行的命令
-# 默认启动服务，但也可以被覆盖用来执行 wire 或 protoc 命令
-#6, commands to be executed as default when the container starts. it can also be used to cover wire or protoc commands 
-CMD ["kratos", "run"]
+# 3. 复制 API 定义 (保留目录结构，防止找不到文件)
+COPY --from=builder /src/api ./api
+
+# 4. 暴露端口
+EXPOSE 8000
+EXPOSE 9000
+
+# 5. 启动命令
+CMD ["./server", "-conf", "/app/configs"]

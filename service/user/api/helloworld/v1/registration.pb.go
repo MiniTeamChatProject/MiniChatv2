@@ -11,7 +11,7 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v3.21.12
-// source: api/helloworld/v1/registration.proto
+// source: helloworld/v1/registration.proto
 
 //package name is api.registraion.v1
 
@@ -43,7 +43,7 @@ type DeleteUserReq struct {
 
 func (x *DeleteUserReq) Reset() {
 	*x = DeleteUserReq{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[0]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -55,7 +55,7 @@ func (x *DeleteUserReq) String() string {
 func (*DeleteUserReq) ProtoMessage() {}
 
 func (x *DeleteUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[0]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -68,7 +68,7 @@ func (x *DeleteUserReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteUserReq.ProtoReflect.Descriptor instead.
 func (*DeleteUserReq) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{0}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *DeleteUserReq) GetId() int64 {
@@ -88,7 +88,7 @@ type DeleteUserReply struct {
 
 func (x *DeleteUserReply) Reset() {
 	*x = DeleteUserReply{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[1]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -100,7 +100,7 @@ func (x *DeleteUserReply) String() string {
 func (*DeleteUserReply) ProtoMessage() {}
 
 func (x *DeleteUserReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[1]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -113,7 +113,7 @@ func (x *DeleteUserReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteUserReply.ProtoReflect.Descriptor instead.
 func (*DeleteUserReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{1}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *DeleteUserReply) GetMsg() string {
@@ -135,7 +135,7 @@ type RegisterReq struct {
 
 func (x *RegisterReq) Reset() {
 	*x = RegisterReq{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[2]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +147,7 @@ func (x *RegisterReq) String() string {
 func (*RegisterReq) ProtoMessage() {}
 
 func (x *RegisterReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[2]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +160,7 @@ func (x *RegisterReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterReq.ProtoReflect.Descriptor instead.
 func (*RegisterReq) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{2}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *RegisterReq) GetUsername() string {
@@ -193,7 +193,7 @@ type RegisterReply struct {
 
 func (x *RegisterReply) Reset() {
 	*x = RegisterReply{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[3]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -205,7 +205,7 @@ func (x *RegisterReply) String() string {
 func (*RegisterReply) ProtoMessage() {}
 
 func (x *RegisterReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[3]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -218,7 +218,7 @@ func (x *RegisterReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterReply.ProtoReflect.Descriptor instead.
 func (*RegisterReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{3}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *RegisterReply) GetMsg() string {
@@ -238,7 +238,7 @@ type LoginReq struct {
 
 func (x *LoginReq) Reset() {
 	*x = LoginReq{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[4]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -250,7 +250,7 @@ func (x *LoginReq) String() string {
 func (*LoginReq) ProtoMessage() {}
 
 func (x *LoginReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[4]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -263,7 +263,7 @@ func (x *LoginReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoginReq.ProtoReflect.Descriptor instead.
 func (*LoginReq) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{4}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *LoginReq) GetUsername() string {
@@ -290,7 +290,7 @@ type LoginReply struct {
 
 func (x *LoginReply) Reset() {
 	*x = LoginReply{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[5]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -302,7 +302,7 @@ func (x *LoginReply) String() string {
 func (*LoginReply) ProtoMessage() {}
 
 func (x *LoginReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[5]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -315,7 +315,7 @@ func (x *LoginReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LoginReply.ProtoReflect.Descriptor instead.
 func (*LoginReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{5}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *LoginReply) GetMsg() string {
@@ -343,7 +343,7 @@ type GetProfileReq struct {
 
 func (x *GetProfileReq) Reset() {
 	*x = GetProfileReq{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[6]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -355,7 +355,7 @@ func (x *GetProfileReq) String() string {
 func (*GetProfileReq) ProtoMessage() {}
 
 func (x *GetProfileReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[6]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -368,7 +368,7 @@ func (x *GetProfileReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetProfileReq.ProtoReflect.Descriptor instead.
 func (*GetProfileReq) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{6}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetProfileReq) GetId() int64 {
@@ -388,7 +388,7 @@ type GetProfileReply struct {
 
 func (x *GetProfileReply) Reset() {
 	*x = GetProfileReply{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[7]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -400,7 +400,7 @@ func (x *GetProfileReply) String() string {
 func (*GetProfileReply) ProtoMessage() {}
 
 func (x *GetProfileReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[7]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -413,7 +413,7 @@ func (x *GetProfileReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetProfileReply.ProtoReflect.Descriptor instead.
 func (*GetProfileReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{7}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetProfileReply) GetUsername() string {
@@ -440,7 +440,7 @@ type UpdateProfileReq struct {
 
 func (x *UpdateProfileReq) Reset() {
 	*x = UpdateProfileReq{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[8]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -452,7 +452,7 @@ func (x *UpdateProfileReq) String() string {
 func (*UpdateProfileReq) ProtoMessage() {}
 
 func (x *UpdateProfileReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[8]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -465,7 +465,7 @@ func (x *UpdateProfileReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProfileReq.ProtoReflect.Descriptor instead.
 func (*UpdateProfileReq) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{8}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *UpdateProfileReq) GetNickname() string {
@@ -491,7 +491,7 @@ type UpdateProfileReply struct {
 
 func (x *UpdateProfileReply) Reset() {
 	*x = UpdateProfileReply{}
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[9]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -503,7 +503,7 @@ func (x *UpdateProfileReply) String() string {
 func (*UpdateProfileReply) ProtoMessage() {}
 
 func (x *UpdateProfileReply) ProtoReflect() protoreflect.Message {
-	mi := &file_api_helloworld_v1_registration_proto_msgTypes[9]
+	mi := &file_helloworld_v1_registration_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -516,7 +516,7 @@ func (x *UpdateProfileReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateProfileReply.ProtoReflect.Descriptor instead.
 func (*UpdateProfileReply) Descriptor() ([]byte, []int) {
-	return file_api_helloworld_v1_registration_proto_rawDescGZIP(), []int{9}
+	return file_helloworld_v1_registration_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateProfileReply) GetMsg() string {
@@ -526,11 +526,11 @@ func (x *UpdateProfileReply) GetMsg() string {
 	return ""
 }
 
-var File_api_helloworld_v1_registration_proto protoreflect.FileDescriptor
+var File_helloworld_v1_registration_proto protoreflect.FileDescriptor
 
-const file_api_helloworld_v1_registration_proto_rawDesc = "" +
+const file_helloworld_v1_registration_proto_rawDesc = "" +
 	"\n" +
-	"$api/helloworld/v1/registration.proto\x12\x13api.registration.v1\x1a\x1cgoogle/api/annotations.proto\"\x1f\n" +
+	" helloworld/v1/registration.proto\x12\x13api.registration.v1\x1a\x1cgoogle/api/annotations.proto\"\x1f\n" +
 	"\rDeleteUserReq\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"#\n" +
 	"\x0fDeleteUserReply\x12\x10\n" +
@@ -570,19 +570,19 @@ const file_api_helloworld_v1_registration_proto_rawDesc = "" +
 	"\x13api.registration.v1P\x01Z\x19user/api/helloworld/v1;v1b\x06proto3"
 
 var (
-	file_api_helloworld_v1_registration_proto_rawDescOnce sync.Once
-	file_api_helloworld_v1_registration_proto_rawDescData []byte
+	file_helloworld_v1_registration_proto_rawDescOnce sync.Once
+	file_helloworld_v1_registration_proto_rawDescData []byte
 )
 
-func file_api_helloworld_v1_registration_proto_rawDescGZIP() []byte {
-	file_api_helloworld_v1_registration_proto_rawDescOnce.Do(func() {
-		file_api_helloworld_v1_registration_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_helloworld_v1_registration_proto_rawDesc), len(file_api_helloworld_v1_registration_proto_rawDesc)))
+func file_helloworld_v1_registration_proto_rawDescGZIP() []byte {
+	file_helloworld_v1_registration_proto_rawDescOnce.Do(func() {
+		file_helloworld_v1_registration_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_helloworld_v1_registration_proto_rawDesc), len(file_helloworld_v1_registration_proto_rawDesc)))
 	})
-	return file_api_helloworld_v1_registration_proto_rawDescData
+	return file_helloworld_v1_registration_proto_rawDescData
 }
 
-var file_api_helloworld_v1_registration_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
-var file_api_helloworld_v1_registration_proto_goTypes = []any{
+var file_helloworld_v1_registration_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_helloworld_v1_registration_proto_goTypes = []any{
 	(*DeleteUserReq)(nil),      // 0: api.registration.v1.DeleteUserReq
 	(*DeleteUserReply)(nil),    // 1: api.registration.v1.DeleteUserReply
 	(*RegisterReq)(nil),        // 2: api.registration.v1.RegisterReq
@@ -594,7 +594,7 @@ var file_api_helloworld_v1_registration_proto_goTypes = []any{
 	(*UpdateProfileReq)(nil),   // 8: api.registration.v1.UpdateProfileReq
 	(*UpdateProfileReply)(nil), // 9: api.registration.v1.UpdateProfileReply
 }
-var file_api_helloworld_v1_registration_proto_depIdxs = []int32{
+var file_helloworld_v1_registration_proto_depIdxs = []int32{
 	2, // 0: api.registration.v1.Registration.Register:input_type -> api.registration.v1.RegisterReq
 	4, // 1: api.registration.v1.Registration.Login:input_type -> api.registration.v1.LoginReq
 	6, // 2: api.registration.v1.Registration.GetProfile:input_type -> api.registration.v1.GetProfileReq
@@ -612,26 +612,26 @@ var file_api_helloworld_v1_registration_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_api_helloworld_v1_registration_proto_init() }
-func file_api_helloworld_v1_registration_proto_init() {
-	if File_api_helloworld_v1_registration_proto != nil {
+func init() { file_helloworld_v1_registration_proto_init() }
+func file_helloworld_v1_registration_proto_init() {
+	if File_helloworld_v1_registration_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_helloworld_v1_registration_proto_rawDesc), len(file_api_helloworld_v1_registration_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_helloworld_v1_registration_proto_rawDesc), len(file_helloworld_v1_registration_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_api_helloworld_v1_registration_proto_goTypes,
-		DependencyIndexes: file_api_helloworld_v1_registration_proto_depIdxs,
-		MessageInfos:      file_api_helloworld_v1_registration_proto_msgTypes,
+		GoTypes:           file_helloworld_v1_registration_proto_goTypes,
+		DependencyIndexes: file_helloworld_v1_registration_proto_depIdxs,
+		MessageInfos:      file_helloworld_v1_registration_proto_msgTypes,
 	}.Build()
-	File_api_helloworld_v1_registration_proto = out.File
-	file_api_helloworld_v1_registration_proto_goTypes = nil
-	file_api_helloworld_v1_registration_proto_depIdxs = nil
+	File_helloworld_v1_registration_proto = out.File
+	file_helloworld_v1_registration_proto_goTypes = nil
+	file_helloworld_v1_registration_proto_depIdxs = nil
 }

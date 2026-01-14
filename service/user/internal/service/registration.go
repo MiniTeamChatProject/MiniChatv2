@@ -47,15 +47,36 @@ func (s *RegistrationService) Login(ctx context.Context, req *pb.LoginReq) (*pb.
 
 // 6. 实现 GetProfile 接口
 func (s *RegistrationService) GetProfile(ctx context.Context, req *pb.GetProfileReq) (*pb.GetProfileReply, error) {
-	user, err := s.uc.GetProfile(ctx, req.Id)
+	// 【关键修改】从 Context 中提取 Token 解析出来的 user_id
+	// 而不是使用 req.Id (前端传的参数)
+	userIdVal := ctx.Value("user_id")
+	if userIdVal == nil {
+		return nil, errors.New("未授权：无法获取用户ID")
+	}
+
+	// 类型断言：确保它是 int64
+	var userId int64
+	switch v := userIdVal.(type) {
+	case int64:
+		userId = v
+	case float64:
+		userId = int64(v)
+	default:
+		return nil, errors.New("用户ID类型错误")
+	}
+
+	// 使用从 Token 拿到的 userId 去查询
+	user, err := s.uc.GetProfile(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
+
 	return &pb.GetProfileReply{
 		Username: user.Username,
 		Nickname: user.Nickname,
 	}, nil
 }
+
 // 7. 实现 DeleteUser 接口
 func (s *RegistrationService) DeleteUser(ctx context.Context, req *pb.DeleteUserReq) (*pb.DeleteUserReply, error) {
     // req.Id 会自动从 URL 的 /user/{id} 中提取出来

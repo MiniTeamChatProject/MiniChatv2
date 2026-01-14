@@ -19,7 +19,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/LoginReq'
+                            $ref: '#/components/schemas/api.registration.v1.LoginReq'
                 required: true
             responses:
                 "200":
@@ -27,13 +27,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/LoginReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.registration.v1.LoginReply'
     /register:
         post:
             tags:
@@ -44,7 +38,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/RegisterReq'
+                            $ref: '#/components/schemas/api.registration.v1.RegisterReq'
                 required: true
             responses:
                 "200":
@@ -52,13 +46,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/RegisterReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.registration.v1.RegisterReply'
     /user/profile:
         get:
             tags:
@@ -79,13 +67,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/GetProfileReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.registration.v1.GetProfileReply'
         put:
             tags:
                 - Registration
@@ -95,7 +77,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/UpdateProfileReq'
+                            $ref: '#/components/schemas/api.registration.v1.UpdateProfileReq'
                 required: true
             responses:
                 "200":
@@ -103,13 +85,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/UpdateProfileReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.registration.v1.UpdateProfileReply'
     /user/{id}:
         delete:
             tags:
@@ -127,56 +103,42 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/DeleteUserReply'
-                default:
-                    description: Default error response
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Status'
+                                $ref: '#/components/schemas/api.registration.v1.DeleteUserReply'
 components:
     schemas:
-        DeleteUserReply:
+        api.registration.v1.DeleteUserReply:
             type: object
             properties:
                 msg:
                     type: string
             description: definition parameter of reply
-        GetProfileReply:
+        api.registration.v1.GetProfileReply:
             type: object
             properties:
                 username:
                     type: string
                 nickname:
                     type: string
-        GoogleProtobufAny:
-            type: object
-            properties:
-                '@type':
-                    type: string
-                    description: The type of the serialized message.
-            additionalProperties: true
-            description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
-        LoginReply:
+        api.registration.v1.LoginReply:
             type: object
             properties:
                 msg:
                     type: string
                 token:
                     type: string
-        LoginReq:
+        api.registration.v1.LoginReq:
             type: object
             properties:
                 username:
                     type: string
                 password:
                     type: string
-        RegisterReply:
+        api.registration.v1.RegisterReply:
             type: object
             properties:
                 msg:
                     type: string
-        RegisterReq:
+        api.registration.v1.RegisterReq:
             type: object
             properties:
                 username:
@@ -186,28 +148,12 @@ components:
                 nickname:
                     type: string
             description: definition of data structure on PostgreSQL(Message)
-        Status:
-            type: object
-            properties:
-                code:
-                    type: integer
-                    description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
-                    format: int32
-                message:
-                    type: string
-                    description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
-                details:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/GoogleProtobufAny'
-                    description: A list of messages that carry the error details.  There is a common set of message types for APIs to use.
-            description: 'The `Status` type defines a logical error model that is suitable for different programming environments, including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains three pieces of data: error code, error message, and error details. You can find out more about this error model and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).'
-        UpdateProfileReply:
+        api.registration.v1.UpdateProfileReply:
             type: object
             properties:
                 msg:
                     type: string
-        UpdateProfileReq:
+        api.registration.v1.UpdateProfileReq:
             type: object
             properties:
                 nickname:
