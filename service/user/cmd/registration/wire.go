@@ -6,11 +6,11 @@
 package main
 
 import (
-	"user/internal/biz"
-	"user/internal/conf"
-	"user/internal/data"
-	"user/internal/server"
-	"user/internal/service"
+	"registration/internal/biz"
+	"registration/internal/conf"
+	"registration/internal/data"
+	"registration/internal/server"
+	"registration/internal/service"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
