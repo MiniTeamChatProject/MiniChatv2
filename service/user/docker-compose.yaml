@@ -1,36 +1,36 @@
 version: '3.8'
 
 services:
-  # --- Container for the micro-service---
+  # --- Go 服务 ---
   user-service:
-    build: .                 # built with Dockerfile on current dir
-    container_name: user_dev # name the container 
+    build: .
+    container_name: user_dev
     volumes:
-      - .:/app               # [core] mount the current dir as volume upon  /app
-                             
+      - .:/app
     ports:
-      - "8000:8000"          # port for HTTP
-      - "9000:9000"          # port for gRPC
+      - "8000:8000"
+      - "9000:9000"
     environment:
-      # tell to the codes：adrress of database is "db" instead of "localhost"
-      # Attention：you need open data.go to change the codes so it can read this env path var, or follow special notes below.    
-    DB_HOST: db
+      - DB_HOST=db
     depends_on:
-      - db                   # start me after the database starts
-    command: kratos run      # command to start 
+      - db
+    command: kratos run
 
-  # --- Container for the Database ---
+  # --- 数据库服务 ---
   db:
-    image: postgres:16-alpine
+    # If you are out of China, turn to use first image source
+    # 切换为了使用国内镜像源，为了下载 PostgreSQL 
+    #image: postgres:16-alpine
+    image: docker.m.daocloud.io/library/postgres:16-alpine
     container_name: user_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 07210721 # this is my default password, dont chage it ! Hurray Nene Ayane !
-      POSTGRES_DB: benutzer_db    # benutzer is a word in German, it means 'user '
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=07210721
+      - POSTGRES_DB=benutzer_db
     ports:
-      - "5432:5432"               # port out, you can view it on pgAdmin4 
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data # persisting data to prevent loss after restarting
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
