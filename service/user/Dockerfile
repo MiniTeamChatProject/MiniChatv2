@@ -1,8 +1,8 @@
 # 使用官方 Go 镜像作为基础（包含完整的 Go 编译器）
 # Go mirror is in need to configure with compelete compiler 
-#FROM golang:1.22
+#FROM golang:1.24
 #国内也下载不了GO 
-FROM docker.m.daocloud.io/library/golang:1.22
+FROM docker.m.daocloud.io/library/golang:1.24
 # 1. 设置环境变量
 # 开启 Module 模式，并配置国内代理（加速下载）
 # 1, Set up enviroment path; then open Module mode, this confiuration has been set for China, please chage it if you are out of China 

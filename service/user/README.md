@@ -1,7 +1,6 @@
 ## USER-REGISTRATION for MiniChatGroup
-
 *Writer: Jonas Peng ; Contact: jonaspong@outlook.com ; Github: jonas-peng*
-IF you are in China, please change address into a supported site for the environment in China
+
 ### 1, Overview
 This is a readme file for microservice as a part for a project named MiniChatGroup as a little try for the first cooperation of our team.
 
