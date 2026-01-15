@@ -1,0 +1,164 @@
+# Generated with protoc-gen-openapi
+# https://github.com/google/gnostic/tree/master/cmd/protoc-gen-openapi
+
+openapi: 3.0.3
+info:
+    title: Registration API
+    description: |-
+        ---API 1:  registeration for users------
+        id is unique, password would be turned into a token made of a series of irrational ASCIIs
+    version: 0.0.1
+paths:
+    /login:
+        post:
+            tags:
+                - Registration
+            description: "----API 2: validation of login---- \ncheck whether the token for password is validate"
+            operationId: Registration_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.registration.v1.LoginReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.registration.v1.LoginReply'
+    /register:
+        post:
+            tags:
+                - Registration
+            description: '---API 1:--- Function of Registration----------------------------'
+            operationId: Registration_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.registration.v1.RegisterReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.registration.v1.RegisterReply'
+    /user/profile:
+        get:
+            tags:
+                - Registration
+            description: |-
+                ----API 3: fetching user info -----
+                this api is CRETICAL for cross-micoservice remote connexion
+            operationId: Registration_GetProfile
+            parameters:
+                - name: id
+                  in: query
+                  description: "parameter in on need, token will be in header to be handled by a mid \n definition of a Proto cannot be null usually,thus why id is here"
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.registration.v1.GetProfileReply'
+        put:
+            tags:
+                - Registration
+            description: 'API 5: Update profiles-------'
+            operationId: Registration_UpdateProfile
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.registration.v1.UpdateProfileReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.registration.v1.UpdateProfileReply'
+    /user/{id}:
+        delete:
+            tags:
+                - Registration
+            operationId: Registration_DeleteUser
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.registration.v1.DeleteUserReply'
+components:
+    schemas:
+        api.registration.v1.DeleteUserReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+            description: definition parameter of reply
+        api.registration.v1.GetProfileReply:
+            type: object
+            properties:
+                username:
+                    type: string
+                nickname:
+                    type: string
+        api.registration.v1.LoginReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+                token:
+                    type: string
+        api.registration.v1.LoginReq:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+        api.registration.v1.RegisterReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+        api.registration.v1.RegisterReq:
+            type: object
+            properties:
+                username:
+                    type: string
+                password:
+                    type: string
+                nickname:
+                    type: string
+            description: definition of data structure on PostgreSQL(Message)
+        api.registration.v1.UpdateProfileReply:
+            type: object
+            properties:
+                msg:
+                    type: string
+        api.registration.v1.UpdateProfileReq:
+            type: object
+            properties:
+                nickname:
+                    type: string
+                email:
+                    type: string
+tags:
+    - name: Registration

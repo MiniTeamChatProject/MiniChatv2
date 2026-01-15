@@ -1,0 +1,32 @@
+services:
+  # --- 用户微服务 ---
+  user-service:
+    build: .                 # 使用当前目录 Dockerfile
+    container_name: user_dev
+    ports:
+      - "8000:8000"          # HTTP
+      - "9000:9000"          # gRPC
+    environment:
+      # 告诉 Go 代码：数据库主机名是 "db"
+      - DB_HOST=db
+    depends_on:
+      - db
+    # 挂载源码，方便你不用重建镜像也能改代码调试 (可选)
+    volumes:
+      - .:/src
+
+  # --- PostgreSQL 数据库 ---
+  db:
+    image: docker.m.daocloud.io/library/postgres:16-alpine
+    container_name: user_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=07210721
+      - POSTGRES_DB=benutzer_db
+    ports:
+      - "5432:5432"          # 映射出来方便本地查看
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

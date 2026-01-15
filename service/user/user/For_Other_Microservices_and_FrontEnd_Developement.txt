@@ -1,0 +1,63 @@
+#Integration Guide, examples for Test_Examples.txt
+链接我的微服务请看这个指导！！
+案例请查看 Test_Examples.txt
+
+## For Frontend Developers (Unity/Vue/React) 前段开发者使用
+本地浏览器可以打开 http://localhost:8000/q/swagger 以查看swagger页面
+This User Service provides a standard RESTful API. 
+本用户服务提供一份标准API列表
+**Base URL**: `http://<server-ip>:8000`
+
+### 1. Authentication Flow (The "Golden Rule") 认证流
+The system uses **JWT (JSON Web Token)** for security.
+本系统使用 JWT以提供安全性
+
+1. Call **Register** (`POST /register`) to create a user.
+# 1, 调用 Register (POST /register) 以创建新用户
+2. Call **Login** (`POST /login`) to get a `token`.
+# 2, 调用 Login （POST /login）以验证登录
+3. **Store this token** (e.g., in `localStorage` or `PlayerPrefs`).
+# 3，调用 Login时会生成一份token，请务必保存此token！！！
+4. For all subsequent requests (Update/Delete/GetProfile), you **MUST** include the token in the Header.
+# 4, 所有接下来的请求（update ，delete， getprofile），必须要带上token以验证！！！
+
+### 2. Header Format 头部格式
+For protected endpoints, set the HTTP Header as follows: 为保护endpoint，将http的头部改为如下文本：
+```http
+验证：必须要用上 Brear, 内容是 application/json
+Authorization: Bearer <Your_Token_Here>
+Content-Type: application/json
+
+前端unity：
+UnityWebRequest request = UnityWebRequest.Put("http://localhost:8000/user/profile", jsonBody);
+request.SetRequestHeader("Content-Type", "application/json");
+request.SetRequestHeader("Authorization", "Bearer " + savedToken);
+yield return request.SendWebRequest();
+
+#### 2. 后端/聊天室对接指南 (For Chat Microservice)
+
+```markdown
+##For Chat Service Developers
+
+The Chat Service should **NOT** access the `benutzer_db` directly. Instead, communicate via API or gRPC.
+聊天室微服务不应该直接接触到数据库benutzer_db ； 必须通过 API 或者 gRPC
+
+### Scenario: Verifying a User Connection 验证用户链接
+When a user connects to the WebSocket Chat Server, they will send their Token. The Chat Server needs to verify if this user is valid.
+当一个用户常识连接到网页聊天室，会发送token，聊天微服务必须检查是否正确
+
+#### Option A: HTTP Check (Simple) 选项A： HTTP检查
+Call the `GET /user/profile` endpoint using the user's token.
+调用 GET /user/profile时必须用上token
+- **200 OK**: User is valid. Response contains `username` and `nickname`.
+- **401/500**: Invalid Token. Reject the WebSocket connection.
+
+#### Option B: gRPC Call (High Performance) 选项B： gRPC调用
+If deployed in the same private network, use gRPC (Port `9000`).
+1. Import `api/helloworld/v1/registration.proto`.
+2. Generate the gRPC Client code.
+3. Call `GetProfile` method internally.
+
+### Scenario: displaying User Info 呈现用户信息
+Do not store `nickname` or `avatar` in the Chat DB. Always fetch the latest profile from User Service to ensure consistency.
+不要把nickname和avatar储存在聊天室数据库里面，从用户信息处获取相关资料以确保更新
