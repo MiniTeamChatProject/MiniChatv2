@@ -21,19 +21,33 @@ import (
 var (
 	// Name is the name of the compiled software.
 	Name string
+
 	// Version is the version of the compiled software.
 	Version string
-	// flagconf is the config flag.
+
+	// flagconf is the config path flag.
 	flagconf string
 
+	// service instance id
 	id, _ = os.Hostname()
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	// 默认使用相对路径，方便本地开发
+	// Docker / K8s 中通过 -conf /configs 覆盖
+	flag.StringVar(
+		&flagconf,
+		"conf",
+		"configs",
+		"config path, eg: -conf configs or -conf /configs",
+	)
 }
 
-func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
+func newApp(
+	logger log.Logger,
+	gs *grpc.Server,
+	hs *http.Server,
+) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -49,7 +63,13 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 
 func main() {
 	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
+
+	if flagconf == "" {
+		panic("config path is required, use -conf to specify")
+	}
+
+	logger := log.With(
+		log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
 		"service.id", id,
@@ -58,6 +78,7 @@ func main() {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
@@ -80,8 +101,8 @@ func main() {
 	}
 	defer cleanup()
 
-	// start and wait for stop signal
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
 }
+
