@@ -61,3 +61,6 @@ If deployed in the same private network, use gRPC (Port `9000`).
 ### Scenario: displaying User Info 呈现用户信息
 Do not store `nickname` or `avatar` in the Chat DB. Always fetch the latest profile from User Service to ensure consistency.
 不要把nickname和avatar储存在聊天室数据库里面，从用户信息处获取相关资料以确保更新
+
+### 本地启动显示传参
+kratos run -- -conf ../../configs

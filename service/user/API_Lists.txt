@@ -1,0 +1,144 @@
+This tutorial shows all APIs and how to call them for other micro-services and the front end
+It must run in a docker, and I recommend to use the same docker network
+
+Service Name: user-service
+Version: v1
+Maintainer: Jonas
+-------------------------------
+This revised API Technical Reference Manual focuses specifically on the Authentication Lifecycle: obtaining the token via Login and using it to verify identity for protected endpoints.
+
+You can copy this directly into your project as API_REFERENCE.md.
+
+User Service API Reference (v1.0)
+Protocol: HTTP / gRPC
+Base URL (Docker): http://user-service:8000
+Base URL (External/Frontend): http://localhost:8000
+
+Part 1: Authentication Mechanism (Crucial)
+This service uses JWT (JSON Web Token). All operations except Registration and Login require a valid Token.
+How to use the Token?
+Get It: Call the /login API. The response contains a long string key called token.
+Store It: Frontend should save this in localStorage; Other services should keep it in memory.
+Use It: For every subsequent request, you must add the following HTTP Header:
+code
+Http
+
+Authorization: Bearer <PASTE_YOUR_TOKEN_HERE>
+Important: There is a space between Bearer and the token string.
+
+Part 2: Public Endpoints (No Token Required)
+1. Register User
+Create a new account. The password will be encrypted immediately.
+URL: /register
+Method: POST
+Body:
+code
+JSON
+{
+  "username": "team_member",
+  "password": "secure123",
+  "nickname": "Teammate"
+}
+
+2. Login (Get Token)
+This is the most important step. You exchange credentials for a digital passport (Token).
+URL: /login
+Method: POST
+Body:
+code
+JSON
+{
+  "username": "team_member",
+  "password": "secure123"
+}
+Response (Success):
+code
+JSON
+{
+  "msg": "登录成功",
+  "token": "eyJhbGciOiJIUzI1NiIs..." // 👈 COPY THIS STRING!
+}
+
+Part 3: Protected Endpoints (Token Required)
+These endpoints will return 500/401 Unauthorized if the header is missing.
+
+3. Get Profile (Token Verification)
+This endpoint serves two purposes:
+Get Info: Frontend gets the current user's details.
+Verify Token: Chat Service calls this to check "Is this token valid? Who owns it?".
+URL: /user/profile
+Method: GET
+Header:
+code
+Text
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+Response (Valid Token):
+code
+JSON
+{
+  "username": "team_member",
+  "nickname": "Teammate",
+  "email": ""
+}
+Response (Invalid Token):
+code
+JSON
+{ "code": 500, "message": "Token invalid or expired" }
+
+4. Update Profile
+Update non-sensitive information.
+URL: /user/profile
+Method: PUT
+Header: Authorization: Bearer <TOKEN>
+Body:
+code
+JSON
+{
+  "nickname": "New Nickname",
+  "email": "new@example.com"
+}
+
+5. Delete User
+Permanently delete the current user.
+URL: /user/{id}
+Method: DELETE
+Header: Authorization: Bearer <TOKEN>
+Example: DELETE /user/1
+
+Part 4: Integration Guide for Teammates
+Scenario A: Frontend (Vue/React/Unity)
+How to maintain a session?
+User fills login form -> Call POST /login.
+Receive JSON -> Extract data.token.
+Save to storage (e.g., localStorage.setItem('token', data.token)).
+When user opens "My Profile" -> Read token -> Call GET /user/profile with Authorization header.
+Scenario B: Chat Service (Go Microservice)
+
+How to verify a WebSocket connection?
+When a user connects to your Chat Service, they must send their token. You need to ask the User Service if it's valid.
+Go Code Example:
+code
+Go
+func ValidateUser(userToken string) (bool, string) {
+    // 1. Construct request to User Service (Internal Docker DNS)
+    req, _ := http.NewRequest("GET", "http://user-service:8000/user/profile", nil)
+    
+    // 2. Attach the token received from the user
+    req.Header.Set("Authorization", "Bearer " + userToken)
+    
+    // 3. Send request
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        return false, "" // Network error
+    }
+    defer resp.Body.Close()
+    
+    // 4. Check status code
+    if resp.StatusCode == 200 {
+        // You can also decode body to get username if needed
+        return true, "Valid User"
+    }
+    
+    return false, "Invalid Token"
+}
