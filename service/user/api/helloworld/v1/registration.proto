@@ -1,0 +1,127 @@
+// path: /registraion/api/helloworld/v1/registration.proto
+// writer: Jonas Peng; jonaspong@outlook.com jonas-peng on Github
+// NOTE!!! it is developed on Ubuntu 24, please add all neccessary depencies and packages before use it 
+// API lists
+//you can add new APIs or change existing ones in this file
+//everytime you make updates to this API files, please input bash: 
+//bash: kratos proto client ./api/helloworld/v1/registration.proto
+//make sure you have read all the readme and tutorials before changing
+
+syntax = "proto3";
+
+//package name is api.registraion.v1
+package api.registration.v1;
+
+import "google/api/annotations.proto";
+
+// 2. go_package 路径非常重要！
+// format :modula name of the project /api dir/version;verno.
+// default modula name is "registration" (check first line of ./README.md
+option go_package = "user/api/helloworld/v1;v1";
+
+option java_multiple_files = true;
+option java_package = "api.registration.v1";
+
+
+//---API 1:  registeration for users------
+//id is unique, password would be turned into a token made of a series of irrational ASCIIs 
+service Registration {
+//---API 1:--- Function of Registration----------------------------    
+  rpc Register (RegisterReq) returns (RegisterReply) {
+    option (google.api.http) = {
+      post: "/register"   // path of HTTP post request
+      body: "*"
+    };
+  }
+
+//----API 2: validation of login---- 
+//check whether the token for password is validate
+  rpc Login (LoginReq) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/login"// path of HTTP post request 
+      body: "*"
+    };
+  }
+  
+//----API 3: fetching user info -----
+//this api is CRETICAL for cross-micoservice remote connexion
+  rpc GetProfile (GetProfileReq) returns (GetProfileReply) {
+     option (google.api.http) = {
+      get: "/user/profile" // path of HTTP get request 
+    };
+  }
+
+//---API 4: deleting user info 
+//you can use this api to delete a user info 
+
+  rpc DeleteUser (DeleteUserReq) returns (DeleteUserReply) {
+    option (google.api.http) = {
+      delete: "/user/{id}" 
+    };
+  }
+//API 5: Update profiles-------
+  rpc UpdateProfile (UpdateProfileReq) returns (UpdateProfileReply){
+    option (google.api.http) = {
+      put: "/user/profile"
+      body: "*"
+    };
+  }
+
+}
+  
+  
+//-------------------------------------------------------------
+//definition of parameters according to functions mentioned before. 
+
+
+// definition parameter of request 
+message DeleteUserReq {
+  int64 id = 1; // responding to {id} in URL
+}
+
+// definition parameter of reply 
+message DeleteUserReply {
+  string msg = 1;
+}
+
+// definition of data structure on PostgreSQL(Message)
+message RegisterReq {
+  string username = 1;// unchangeable
+  string password = 2;// unchangeable, convet into a token later 
+  string nickname = 3;// changeable 
+}
+
+message RegisterReply {
+  string msg = 1;
+  // return user id after registration 
+}
+
+message LoginReq {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginReply {
+  string msg = 1;
+  string token = 2;
+}
+
+message GetProfileReq {
+    // parameter in on need, token will be in header to be handled by a mid 
+    // definition of a Proto cannot be null usually,thus why id is here
+    int64 id = 1; 
+}
+
+message GetProfileReply {
+    string username = 1;
+    string nickname = 2;
+}
+
+message UpdateProfileReq{
+  string nickname = 1;
+  string email = 2;
+}
+message UpdateProfileReply{
+  string msg = 1;
+}
+
