@@ -3,6 +3,7 @@ package server
 import (
 	v1 "room/api/room/v1"
 	"room/internal/conf"
+	"room/internal/middleware"
 	"room/internal/service"
 
 	"github.com/go-kratos-ecosystem/components/v2/middleware/cors"
@@ -20,8 +21,10 @@ func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, wsSvc *service.
 			cors.Cors(
 				cors.AllowedOrigins("*"),
 				cors.AllowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS"),
-				cors.AllowedHeaders("Content-Type", "Authorization", "X-Requested-With"),
+				cors.AllowedHeaders("Content-Type", "Authorization", "X-Requested-With", "X-User-ID", "X-Username"),
 			),
+			// Auth 中间件白名单：GetRoom 和 ListAllRooms 不需要认证
+			middleware.Auth("GetRoom", "ListAllRooms", "GetMessages"),
 		),
 	}
 	if c.Http.Network != "" {

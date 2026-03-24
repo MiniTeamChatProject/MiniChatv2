@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"time"
 	"room/api/room/v1"
 	"room/internal/biz"
@@ -35,9 +36,7 @@ func (s *RoomService) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest)
 	// 从 context 中获取 user_id
 	userID := middleware.GetUserIDFromContext(ctx)
 	if userID == 0 {
-		// 开发环境默认使用 user_id=1，生产环境应返回错误
-		userID = int64(1)
-		s.log.Warnf("No user ID in context, using default: %d", userID)
+		return nil, errors.New("unauthorized: user ID not found in context")
 	}
 
 	room := &biz.Room{
@@ -120,8 +119,7 @@ func (s *RoomService) JoinRoom(ctx context.Context, req *v1.JoinRoomRequest) (*v
 	// 从 context 中获取 user_id
 	userID := middleware.GetUserIDFromContext(ctx)
 	if userID == 0 {
-		userID = int64(1) // 开发环境默认值
-		s.log.Warnf("No user ID in context, using default: %d", userID)
+		return nil, errors.New("unauthorized: user ID not found in context")
 	}
 
 	member, err := s.muc.Join(ctx, req.RoomId, userID)
@@ -142,8 +140,7 @@ func (s *RoomService) LeaveRoom(ctx context.Context, req *v1.LeaveRoomRequest) (
 	// 从 context 中获取 user_id
 	userID := middleware.GetUserIDFromContext(ctx)
 	if userID == 0 {
-		userID = int64(1) // 开发环境默认值
-		s.log.Warnf("No user ID in context, using default: %d", userID)
+		return nil, errors.New("unauthorized: user ID not found in context")
 	}
 
 	err := s.muc.Leave(ctx, req.RoomId, userID)
@@ -179,8 +176,11 @@ func (s *RoomService) ListMembers(ctx context.Context, req *v1.ListMembersReques
 
 // KickMember 踢出成员
 func (s *RoomService) KickMember(ctx context.Context, req *v1.KickMemberRequest) (*v1.KickMemberReply, error) {
-	// TODO: 从 context 中获取 operator_id
-	operatorID := int64(1) // 临时硬编码
+	// 从 context 中获取 operator_id
+	operatorID := middleware.GetUserIDFromContext(ctx)
+	if operatorID == 0 {
+		return nil, errors.New("unauthorized: operator ID not found in context")
+	}
 
 	err := s.muc.Kick(ctx, req.RoomId, operatorID, req.UserId)
 	if err != nil {
@@ -194,8 +194,11 @@ func (s *RoomService) KickMember(ctx context.Context, req *v1.KickMemberRequest)
 
 // UpdateMemberRole 更新成员角色
 func (s *RoomService) UpdateMemberRole(ctx context.Context, req *v1.UpdateMemberRoleRequest) (*v1.UpdateMemberRoleReply, error) {
-	// TODO: 从 context 中获取 operator_id
-	operatorID := int64(1) // 临时硬编码
+	// 从 context 中获取 operator_id
+	operatorID := middleware.GetUserIDFromContext(ctx)
+	if operatorID == 0 {
+		return nil, errors.New("unauthorized: operator ID not found in context")
+	}
 
 	err := s.muc.UpdateRole(ctx, req.RoomId, operatorID, req.UserId, biz.MemberRole(req.Role))
 	if err != nil {
@@ -209,8 +212,11 @@ func (s *RoomService) UpdateMemberRole(ctx context.Context, req *v1.UpdateMember
 
 // MuteMember 禁言/解禁成员
 func (s *RoomService) MuteMember(ctx context.Context, req *v1.MuteMemberRequest) (*v1.MuteMemberReply, error) {
-	// TODO: 从 context 中获取 operator_id
-	operatorID := int64(1) // 临时硬编码
+	// 从 context 中获取 operator_id
+	operatorID := middleware.GetUserIDFromContext(ctx)
+	if operatorID == 0 {
+		return nil, errors.New("unauthorized: operator ID not found in context")
+	}
 
 	var muteUntil *time.Time
 	if req.MuteUntil > 0 {
@@ -275,8 +281,7 @@ func (s *RoomService) SendMessage(ctx context.Context, req *v1.SendMessageReques
 	// 从 context 中获取 user_id
 	userID := middleware.GetUserIDFromContext(ctx)
 	if userID == 0 {
-		userID = int64(1) // 开发环境默认值
-		s.log.Warnf("No user ID in context, using default: %d", userID)
+		return nil, errors.New("unauthorized: user ID not found in context")
 	}
 
 	message, err := s.msguc.Send(ctx, req.RoomId, userID, req.Content, biz.MessageType(req.Type))
