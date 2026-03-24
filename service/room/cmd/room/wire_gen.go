@@ -22,7 +22,9 @@ import (
 
 // Injectors from wire.go:
 
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
+	confServer := wireServerProvider(bootstrap)
+	confData := wireDataProvider(bootstrap)
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
@@ -42,4 +44,16 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	return app, func() {
 		cleanup()
 	}, nil
+}
+
+// wire.go:
+
+// wireServerProvider 从 Bootstrap 中提取 Server 配置
+func wireServerProvider(bc *conf.Bootstrap) *conf.Server {
+	return bc.Server
+}
+
+// wireDataProvider 从 Bootstrap 中提取 Data 配置
+func wireDataProvider(bc *conf.Bootstrap) *conf.Data {
+	return bc.Data
 }

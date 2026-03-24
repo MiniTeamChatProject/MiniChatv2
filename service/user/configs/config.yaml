@@ -1,15 +1,15 @@
 server:
   http:
     addr: 0.0.0.0:8000
-    timeout: 1s
+    timeout: 10s
   grpc:
     addr: 0.0.0.0:9000
-    timeout: 1s
+    timeout: 10s
 data:
   database:
-    driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
-  redis:
-    addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    driver: postgres
+    source: postgres://postgres:07210721@user-db:5432/benutzer_db?sslmode=disable
+    max_open_conns: 100
+    max_idle_conns: 10
+    conn_max_lifetime: 300s
+    enable_auto_migrate: true

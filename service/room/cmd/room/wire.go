@@ -15,8 +15,20 @@ import (
 	"github.com/google/wire"
 )
 
-func wireApp(*conf.Server, *conf.Data, log.Logger) (*kratos.App, func(), error) {
+// wireServerProvider 从 Bootstrap 中提取 Server 配置
+func wireServerProvider(bc *conf.Bootstrap) *conf.Server {
+	return bc.Server
+}
+
+// wireDataProvider 从 Bootstrap 中提取 Data 配置
+func wireDataProvider(bc *conf.Bootstrap) *conf.Data {
+	return bc.Data
+}
+
+func wireApp(*conf.Bootstrap, log.Logger) (*kratos.App, func(), error) {
 	wire.Build(
+		wireServerProvider,
+		wireDataProvider,
 		server.ProviderSet,
 		data.ProviderSet,
 		biz.ProviderSet,

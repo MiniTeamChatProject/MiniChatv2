@@ -10,7 +10,7 @@ server:
 data:
   database:
     driver: postgres
-    source: postgres://minichat:minichat123@localhost:5432/room_service?sslmode=disable
+    source: postgres://minichat:minichat123@room-db:5432/room_service?sslmode=disable
     max_open_conns: 100
     max_idle_conns: 10
     conn_max_lifetime: 300s
