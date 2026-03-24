@@ -109,6 +109,32 @@ func (uc *RoomUsecase) ListByUserID(ctx context.Context, userID int64, page, pag
 	return uc.repo.ListByUserID(ctx, userID, pageSize, offset)
 }
 
+// ListAll 获取所有房间列表
+func (uc *RoomUsecase) ListAll(ctx context.Context, page, pageSize int) ([]*Room, int, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	offset := (page - 1) * pageSize
+	rooms, total, err := uc.repo.ListAll(ctx, pageSize, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 为每个房间获取当前成员数
+	for _, room := range rooms {
+		count, err := uc.repo.GetMemberCount(ctx, room.ID)
+		if err == nil {
+			room.CurrentCount = count
+		}
+	}
+
+	return rooms, total, nil
+}
+
 // CanJoin 检查是否可以加入房间
 func (uc *RoomUsecase) CanJoin(ctx context.Context, roomID int64) error {
 	room, err := uc.repo.Get(ctx, roomID)

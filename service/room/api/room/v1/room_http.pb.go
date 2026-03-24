@@ -25,6 +25,7 @@ const OperationRoomServiceGetRoom = "/room.v1.RoomService/GetRoom"
 const OperationRoomServiceJoinRoom = "/room.v1.RoomService/JoinRoom"
 const OperationRoomServiceKickMember = "/room.v1.RoomService/KickMember"
 const OperationRoomServiceLeaveRoom = "/room.v1.RoomService/LeaveRoom"
+const OperationRoomServiceListAllRooms = "/room.v1.RoomService/ListAllRooms"
 const OperationRoomServiceListMembers = "/room.v1.RoomService/ListMembers"
 const OperationRoomServiceListUserRooms = "/room.v1.RoomService/ListUserRooms"
 const OperationRoomServiceMuteMember = "/room.v1.RoomService/MuteMember"
@@ -44,6 +45,8 @@ type RoomServiceHTTPServer interface {
 	KickMember(context.Context, *KickMemberRequest) (*KickMemberReply, error)
 	// LeaveRoom 退出房间
 	LeaveRoom(context.Context, *LeaveRoomRequest) (*LeaveRoomReply, error)
+	// ListAllRooms 获取所有房间列表
+	ListAllRooms(context.Context, *ListAllRoomsRequest) (*ListAllRoomsReply, error)
 	// ListMembers 获取房间成员列表
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error)
 	// ListUserRooms 获取用户加入的房间列表
@@ -69,6 +72,7 @@ func RegisterRoomServiceHTTPServer(s *http.Server, srv RoomServiceHTTPServer) {
 	r.PUT("/v1/rooms/{room_id}/members/{user_id}/role", _RoomService_UpdateMemberRole0_HTTP_Handler(srv))
 	r.PUT("/v1/rooms/{room_id}/members/{user_id}/mute", _RoomService_MuteMember0_HTTP_Handler(srv))
 	r.GET("/v1/users/{user_id}/rooms", _RoomService_ListUserRooms0_HTTP_Handler(srv))
+	r.GET("/v1/rooms", _RoomService_ListAllRooms0_HTTP_Handler(srv))
 }
 
 func _RoomService_CreateRoom0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx http.Context) error {
@@ -328,6 +332,25 @@ func _RoomService_ListUserRooms0_HTTP_Handler(srv RoomServiceHTTPServer) func(ct
 	}
 }
 
+func _RoomService_ListAllRooms0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListAllRoomsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoomServiceListAllRooms)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListAllRooms(ctx, req.(*ListAllRoomsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListAllRoomsReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type RoomServiceHTTPClient interface {
 	// CreateRoom 创建房间
 	CreateRoom(ctx context.Context, req *CreateRoomRequest, opts ...http.CallOption) (rsp *CreateRoomReply, err error)
@@ -341,6 +364,8 @@ type RoomServiceHTTPClient interface {
 	KickMember(ctx context.Context, req *KickMemberRequest, opts ...http.CallOption) (rsp *KickMemberReply, err error)
 	// LeaveRoom 退出房间
 	LeaveRoom(ctx context.Context, req *LeaveRoomRequest, opts ...http.CallOption) (rsp *LeaveRoomReply, err error)
+	// ListAllRooms 获取所有房间列表
+	ListAllRooms(ctx context.Context, req *ListAllRoomsRequest, opts ...http.CallOption) (rsp *ListAllRoomsReply, err error)
 	// ListMembers 获取房间成员列表
 	ListMembers(ctx context.Context, req *ListMembersRequest, opts ...http.CallOption) (rsp *ListMembersReply, err error)
 	// ListUserRooms 获取用户加入的房间列表
@@ -439,6 +464,20 @@ func (c *RoomServiceHTTPClientImpl) LeaveRoom(ctx context.Context, in *LeaveRoom
 	opts = append(opts, http.Operation(OperationRoomServiceLeaveRoom))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListAllRooms 获取所有房间列表
+func (c *RoomServiceHTTPClientImpl) ListAllRooms(ctx context.Context, in *ListAllRoomsRequest, opts ...http.CallOption) (*ListAllRoomsReply, error) {
+	var out ListAllRoomsReply
+	pattern := "/v1/rooms"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationRoomServiceListAllRooms))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -233,6 +233,27 @@ func (s *RoomService) ListUserRooms(ctx context.Context, req *v1.ListUserRoomsRe
 	}, nil
 }
 
+// ListAllRooms 获取所有房间列表
+func (s *RoomService) ListAllRooms(ctx context.Context, req *v1.ListAllRoomsRequest) (*v1.ListAllRoomsReply, error) {
+	page := int(req.Page)
+	pageSize := int(req.PageSize)
+
+	rooms, total, err := s.uc.ListAll(ctx, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	protoRooms := make([]*v1.Room, len(rooms))
+	for i, r := range rooms {
+		protoRooms[i] = s.toProtoRoom(r)
+	}
+
+	return &v1.ListAllRoomsReply{
+		Rooms: protoRooms,
+		Total: int32(total),
+	}, nil
+}
+
 // toProtoRoom 转换为 Proto 模型
 func (s *RoomService) toProtoRoom(r *biz.Room) *v1.Room {
 	if r == nil {

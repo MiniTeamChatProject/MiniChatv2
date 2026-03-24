@@ -134,6 +134,35 @@ func (r *roomRepo) ListByUserID(ctx context.Context, userID int64, limit, offset
 	return result, int(total), nil
 }
 
+// ListAll 获取所有房间列表
+func (r *roomRepo) ListAll(ctx context.Context, limit, offset int) ([]*biz.Room, int, error) {
+	var rooms []*model.Room
+	var total int64
+
+	// 获取总数
+	err := r.data.db.WithContext(ctx).Model(&model.Room{}).Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// 获取房间列表
+	err = r.data.db.WithContext(ctx).
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&rooms).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	result := make([]*biz.Room, len(rooms))
+	for i, room := range rooms {
+		result[i] = r.toBizRoom(room)
+	}
+
+	return result, int(total), nil
+}
+
 // GetMemberCount 获取成员数量
 func (r *roomRepo) GetMemberCount(ctx context.Context, roomID int64) (int, error) {
 	var count int64

@@ -26,6 +26,29 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
     /v1/rooms:
+        get:
+            tags:
+                - RoomService
+            description: 获取所有房间列表
+            operationId: RoomService_ListAllRooms
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.ListAllRoomsReply'
         post:
             tags:
                 - RoomService
@@ -377,6 +400,17 @@ components:
                 roomId:
                     type: string
             description: 退出房间请求
+        room.v1.ListAllRoomsReply:
+            type: object
+            properties:
+                rooms:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/room.v1.Room'
+                total:
+                    type: integer
+                    format: int32
+            description: 获取所有房间列表响应
         room.v1.ListMembersReply:
             type: object
             properties:

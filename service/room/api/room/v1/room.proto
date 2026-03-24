@@ -201,6 +201,18 @@ message ListUserRoomsReply {
   int32 total = 2;
 }
 
+// 获取所有房间列表请求
+message ListAllRoomsRequest {
+  int32 page = 1;      // Page number, default 1
+  int32 page_size = 2; // Page size, default 20, max 100
+}
+
+// 获取所有房间列表响应
+message ListAllRoomsReply {
+  repeated Room rooms = 1;
+  int32 total = 2;
+}
+
 // 房间服务
 service RoomService {
   // 创建房间
@@ -283,6 +295,13 @@ service RoomService {
   rpc ListUserRooms (ListUserRoomsRequest) returns (ListUserRoomsReply) {
     option (google.api.http) = {
       get: "/v1/users/{user_id}/rooms"
+    };
+  }
+
+  // 获取所有房间列表
+  rpc ListAllRooms (ListAllRoomsRequest) returns (ListAllRoomsReply) {
+    option (google.api.http) = {
+      get: "/v1/rooms"
     };
   }
 }

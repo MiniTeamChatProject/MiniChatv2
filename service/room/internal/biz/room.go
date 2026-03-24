@@ -49,6 +49,7 @@ type RoomRepository interface {
 	Update(ctx context.Context, room *Room) (*Room, error)
 	Delete(ctx context.Context, id int64) error
 	ListByUserID(ctx context.Context, userID int64, limit, offset int) ([]*Room, int, error)
+	ListAll(ctx context.Context, limit, offset int) ([]*Room, int, error)
 	GetMemberCount(ctx context.Context, roomID int64) (int, error)
 }
 

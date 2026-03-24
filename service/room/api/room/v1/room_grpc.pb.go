@@ -30,6 +30,7 @@ const (
 	RoomService_UpdateMemberRole_FullMethodName = "/room.v1.RoomService/UpdateMemberRole"
 	RoomService_MuteMember_FullMethodName       = "/room.v1.RoomService/MuteMember"
 	RoomService_ListUserRooms_FullMethodName    = "/room.v1.RoomService/ListUserRooms"
+	RoomService_ListAllRooms_FullMethodName     = "/room.v1.RoomService/ListAllRooms"
 )
 
 // RoomServiceClient is the client API for RoomService service.
@@ -60,6 +61,8 @@ type RoomServiceClient interface {
 	MuteMember(ctx context.Context, in *MuteMemberRequest, opts ...grpc.CallOption) (*MuteMemberReply, error)
 	// 获取用户加入的房间列表
 	ListUserRooms(ctx context.Context, in *ListUserRoomsRequest, opts ...grpc.CallOption) (*ListUserRoomsReply, error)
+	// 获取所有房间列表
+	ListAllRooms(ctx context.Context, in *ListAllRoomsRequest, opts ...grpc.CallOption) (*ListAllRoomsReply, error)
 }
 
 type roomServiceClient struct {
@@ -180,6 +183,16 @@ func (c *roomServiceClient) ListUserRooms(ctx context.Context, in *ListUserRooms
 	return out, nil
 }
 
+func (c *roomServiceClient) ListAllRooms(ctx context.Context, in *ListAllRoomsRequest, opts ...grpc.CallOption) (*ListAllRoomsReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAllRoomsReply)
+	err := c.cc.Invoke(ctx, RoomService_ListAllRooms_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoomServiceServer is the server API for RoomService service.
 // All implementations must embed UnimplementedRoomServiceServer
 // for forward compatibility.
@@ -208,6 +221,8 @@ type RoomServiceServer interface {
 	MuteMember(context.Context, *MuteMemberRequest) (*MuteMemberReply, error)
 	// 获取用户加入的房间列表
 	ListUserRooms(context.Context, *ListUserRoomsRequest) (*ListUserRoomsReply, error)
+	// 获取所有房间列表
+	ListAllRooms(context.Context, *ListAllRoomsRequest) (*ListAllRoomsReply, error)
 	mustEmbedUnimplementedRoomServiceServer()
 }
 
@@ -250,6 +265,9 @@ func (UnimplementedRoomServiceServer) MuteMember(context.Context, *MuteMemberReq
 }
 func (UnimplementedRoomServiceServer) ListUserRooms(context.Context, *ListUserRoomsRequest) (*ListUserRoomsReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListUserRooms not implemented")
+}
+func (UnimplementedRoomServiceServer) ListAllRooms(context.Context, *ListAllRoomsRequest) (*ListAllRoomsReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListAllRooms not implemented")
 }
 func (UnimplementedRoomServiceServer) mustEmbedUnimplementedRoomServiceServer() {}
 func (UnimplementedRoomServiceServer) testEmbeddedByValue()                     {}
@@ -470,6 +488,24 @@ func _RoomService_ListUserRooms_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RoomService_ListAllRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAllRoomsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoomServiceServer).ListAllRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoomService_ListAllRooms_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoomServiceServer).ListAllRooms(ctx, req.(*ListAllRoomsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RoomService_ServiceDesc is the grpc.ServiceDesc for RoomService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -520,6 +556,10 @@ var RoomService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUserRooms",
 			Handler:    _RoomService_ListUserRooms_Handler,
+		},
+		{
+			MethodName: "ListAllRooms",
+			Handler:    _RoomService_ListAllRooms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

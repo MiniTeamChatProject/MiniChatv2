@@ -1653,6 +1653,112 @@ func (x *ListUserRoomsReply) GetTotal() int32 {
 	return 0
 }
 
+// 获取所有房间列表请求
+type ListAllRoomsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`                         // Page number, default 1
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"` // Page size, default 20, max 100
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAllRoomsRequest) Reset() {
+	*x = ListAllRoomsRequest{}
+	mi := &file_room_v1_room_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAllRoomsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAllRoomsRequest) ProtoMessage() {}
+
+func (x *ListAllRoomsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_room_v1_room_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAllRoomsRequest.ProtoReflect.Descriptor instead.
+func (*ListAllRoomsRequest) Descriptor() ([]byte, []int) {
+	return file_room_v1_room_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ListAllRoomsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListAllRoomsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// 获取所有房间列表响应
+type ListAllRoomsReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Rooms         []*Room                `protobuf:"bytes,1,rep,name=rooms,proto3" json:"rooms,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListAllRoomsReply) Reset() {
+	*x = ListAllRoomsReply{}
+	mi := &file_room_v1_room_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListAllRoomsReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListAllRoomsReply) ProtoMessage() {}
+
+func (x *ListAllRoomsReply) ProtoReflect() protoreflect.Message {
+	mi := &file_room_v1_room_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListAllRoomsReply.ProtoReflect.Descriptor instead.
+func (*ListAllRoomsReply) Descriptor() ([]byte, []int) {
+	return file_room_v1_room_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ListAllRoomsReply) GetRooms() []*Room {
+	if x != nil {
+		return x.Rooms
+	}
+	return nil
+}
+
+func (x *ListAllRoomsReply) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 var File_room_v1_room_proto protoreflect.FileDescriptor
 
 const file_room_v1_room_proto_rawDesc = "" +
@@ -1754,6 +1860,12 @@ const file_room_v1_room_proto_rawDesc = "" +
 	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"O\n" +
 	"\x12ListUserRoomsReply\x12#\n" +
 	"\x05rooms\x18\x01 \x03(\v2\r.room.v1.RoomR\x05rooms\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"F\n" +
+	"\x13ListAllRoomsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"N\n" +
+	"\x11ListAllRoomsReply\x12#\n" +
+	"\x05rooms\x18\x01 \x03(\v2\r.room.v1.RoomR\x05rooms\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total*t\n" +
 	"\bRoomType\x12\x15\n" +
 	"\x11ROOM_TYPE_UNKNOWN\x10\x00\x12\x13\n" +
@@ -1779,7 +1891,7 @@ const file_room_v1_room_proto_rawDesc = "" +
 	"\x15MEMBER_STATUS_UNKNOWN\x10\x00\x12\x18\n" +
 	"\x14MEMBER_STATUS_NORMAL\x10\x01\x12\x17\n" +
 	"\x13MEMBER_STATUS_MUTED\x10\x02\x12\x16\n" +
-	"\x12MEMBER_STATUS_LEFT\x10\x032\x97\t\n" +
+	"\x12MEMBER_STATUS_LEFT\x10\x032\xf4\t\n" +
 	"\vRoomService\x12X\n" +
 	"\n" +
 	"CreateRoom\x12\x1a.room.v1.CreateRoomRequest\x1a\x18.room.v1.CreateRoomReply\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/rooms\x12Q\n" +
@@ -1796,7 +1908,8 @@ const file_room_v1_room_proto_rawDesc = "" +
 	"\x10UpdateMemberRole\x12 .room.v1.UpdateMemberRoleRequest\x1a\x1e.room.v1.UpdateMemberRoleReply\"5\x82\xd3\xe4\x93\x02/:\x01*\x1a*/v1/rooms/{room_id}/members/{user_id}/role\x12y\n" +
 	"\n" +
 	"MuteMember\x12\x1a.room.v1.MuteMemberRequest\x1a\x18.room.v1.MuteMemberReply\"5\x82\xd3\xe4\x93\x02/:\x01*\x1a*/v1/rooms/{room_id}/members/{user_id}/mute\x12n\n" +
-	"\rListUserRooms\x12\x1d.room.v1.ListUserRoomsRequest\x1a\x1b.room.v1.ListUserRoomsReply\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/users/{user_id}/roomsB\x15Z\x13room/api/room/v1;v1b\x06proto3"
+	"\rListUserRooms\x12\x1d.room.v1.ListUserRoomsRequest\x1a\x1b.room.v1.ListUserRoomsReply\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/users/{user_id}/rooms\x12[\n" +
+	"\fListAllRooms\x12\x1c.room.v1.ListAllRoomsRequest\x1a\x1a.room.v1.ListAllRoomsReply\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/roomsB\x15Z\x13room/api/room/v1;v1b\x06proto3"
 
 var (
 	file_room_v1_room_proto_rawDescOnce sync.Once
@@ -1811,7 +1924,7 @@ func file_room_v1_room_proto_rawDescGZIP() []byte {
 }
 
 var file_room_v1_room_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_room_v1_room_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_room_v1_room_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_room_v1_room_proto_goTypes = []any{
 	(RoomType)(0),                   // 0: room.v1.RoomType
 	(RoomStatus)(0),                 // 1: room.v1.RoomStatus
@@ -1841,6 +1954,8 @@ var file_room_v1_room_proto_goTypes = []any{
 	(*MuteMemberReply)(nil),         // 25: room.v1.MuteMemberReply
 	(*ListUserRoomsRequest)(nil),    // 26: room.v1.ListUserRoomsRequest
 	(*ListUserRoomsReply)(nil),      // 27: room.v1.ListUserRoomsReply
+	(*ListAllRoomsRequest)(nil),     // 28: room.v1.ListAllRoomsRequest
+	(*ListAllRoomsReply)(nil),       // 29: room.v1.ListAllRoomsReply
 }
 var file_room_v1_room_proto_depIdxs = []int32{
 	0,  // 0: room.v1.Room.type:type_name -> room.v1.RoomType
@@ -1856,33 +1971,36 @@ var file_room_v1_room_proto_depIdxs = []int32{
 	5,  // 10: room.v1.ListMembersReply.members:type_name -> room.v1.RoomMember
 	2,  // 11: room.v1.UpdateMemberRoleRequest.role:type_name -> room.v1.MemberRole
 	4,  // 12: room.v1.ListUserRoomsReply.rooms:type_name -> room.v1.Room
-	6,  // 13: room.v1.RoomService.CreateRoom:input_type -> room.v1.CreateRoomRequest
-	8,  // 14: room.v1.RoomService.GetRoom:input_type -> room.v1.GetRoomRequest
-	10, // 15: room.v1.RoomService.UpdateRoom:input_type -> room.v1.UpdateRoomRequest
-	12, // 16: room.v1.RoomService.DeleteRoom:input_type -> room.v1.DeleteRoomRequest
-	14, // 17: room.v1.RoomService.JoinRoom:input_type -> room.v1.JoinRoomRequest
-	16, // 18: room.v1.RoomService.LeaveRoom:input_type -> room.v1.LeaveRoomRequest
-	18, // 19: room.v1.RoomService.ListMembers:input_type -> room.v1.ListMembersRequest
-	20, // 20: room.v1.RoomService.KickMember:input_type -> room.v1.KickMemberRequest
-	22, // 21: room.v1.RoomService.UpdateMemberRole:input_type -> room.v1.UpdateMemberRoleRequest
-	24, // 22: room.v1.RoomService.MuteMember:input_type -> room.v1.MuteMemberRequest
-	26, // 23: room.v1.RoomService.ListUserRooms:input_type -> room.v1.ListUserRoomsRequest
-	7,  // 24: room.v1.RoomService.CreateRoom:output_type -> room.v1.CreateRoomReply
-	9,  // 25: room.v1.RoomService.GetRoom:output_type -> room.v1.GetRoomReply
-	11, // 26: room.v1.RoomService.UpdateRoom:output_type -> room.v1.UpdateRoomReply
-	13, // 27: room.v1.RoomService.DeleteRoom:output_type -> room.v1.DeleteRoomReply
-	15, // 28: room.v1.RoomService.JoinRoom:output_type -> room.v1.JoinRoomReply
-	17, // 29: room.v1.RoomService.LeaveRoom:output_type -> room.v1.LeaveRoomReply
-	19, // 30: room.v1.RoomService.ListMembers:output_type -> room.v1.ListMembersReply
-	21, // 31: room.v1.RoomService.KickMember:output_type -> room.v1.KickMemberReply
-	23, // 32: room.v1.RoomService.UpdateMemberRole:output_type -> room.v1.UpdateMemberRoleReply
-	25, // 33: room.v1.RoomService.MuteMember:output_type -> room.v1.MuteMemberReply
-	27, // 34: room.v1.RoomService.ListUserRooms:output_type -> room.v1.ListUserRoomsReply
-	24, // [24:35] is the sub-list for method output_type
-	13, // [13:24] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	4,  // 13: room.v1.ListAllRoomsReply.rooms:type_name -> room.v1.Room
+	6,  // 14: room.v1.RoomService.CreateRoom:input_type -> room.v1.CreateRoomRequest
+	8,  // 15: room.v1.RoomService.GetRoom:input_type -> room.v1.GetRoomRequest
+	10, // 16: room.v1.RoomService.UpdateRoom:input_type -> room.v1.UpdateRoomRequest
+	12, // 17: room.v1.RoomService.DeleteRoom:input_type -> room.v1.DeleteRoomRequest
+	14, // 18: room.v1.RoomService.JoinRoom:input_type -> room.v1.JoinRoomRequest
+	16, // 19: room.v1.RoomService.LeaveRoom:input_type -> room.v1.LeaveRoomRequest
+	18, // 20: room.v1.RoomService.ListMembers:input_type -> room.v1.ListMembersRequest
+	20, // 21: room.v1.RoomService.KickMember:input_type -> room.v1.KickMemberRequest
+	22, // 22: room.v1.RoomService.UpdateMemberRole:input_type -> room.v1.UpdateMemberRoleRequest
+	24, // 23: room.v1.RoomService.MuteMember:input_type -> room.v1.MuteMemberRequest
+	26, // 24: room.v1.RoomService.ListUserRooms:input_type -> room.v1.ListUserRoomsRequest
+	28, // 25: room.v1.RoomService.ListAllRooms:input_type -> room.v1.ListAllRoomsRequest
+	7,  // 26: room.v1.RoomService.CreateRoom:output_type -> room.v1.CreateRoomReply
+	9,  // 27: room.v1.RoomService.GetRoom:output_type -> room.v1.GetRoomReply
+	11, // 28: room.v1.RoomService.UpdateRoom:output_type -> room.v1.UpdateRoomReply
+	13, // 29: room.v1.RoomService.DeleteRoom:output_type -> room.v1.DeleteRoomReply
+	15, // 30: room.v1.RoomService.JoinRoom:output_type -> room.v1.JoinRoomReply
+	17, // 31: room.v1.RoomService.LeaveRoom:output_type -> room.v1.LeaveRoomReply
+	19, // 32: room.v1.RoomService.ListMembers:output_type -> room.v1.ListMembersReply
+	21, // 33: room.v1.RoomService.KickMember:output_type -> room.v1.KickMemberReply
+	23, // 34: room.v1.RoomService.UpdateMemberRole:output_type -> room.v1.UpdateMemberRoleReply
+	25, // 35: room.v1.RoomService.MuteMember:output_type -> room.v1.MuteMemberReply
+	27, // 36: room.v1.RoomService.ListUserRooms:output_type -> room.v1.ListUserRoomsReply
+	29, // 37: room.v1.RoomService.ListAllRooms:output_type -> room.v1.ListAllRoomsReply
+	26, // [26:38] is the sub-list for method output_type
+	14, // [14:26] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_room_v1_room_proto_init() }
@@ -1896,7 +2014,7 @@ func file_room_v1_room_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_room_v1_room_proto_rawDesc), len(file_room_v1_room_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   24,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

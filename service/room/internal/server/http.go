@@ -5,9 +5,11 @@ import (
 	"room/internal/conf"
 	"room/internal/service"
 
+	"github.com/go-kratos-ecosystem/components/v2/middleware/cors"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/swagger-api/openapiv2"
 )
 
 // NewHTTPServer new a HTTP server.
@@ -15,6 +17,11 @@ func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, logger log.Logg
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			cors.Cors(
+				cors.AllowedOrigins("*"),
+				cors.AllowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS"),
+				cors.AllowedHeaders("Content-Type", "Authorization", "X-Requested-With"),
+			),
 		),
 	}
 	if c.Http.Network != "" {
@@ -28,6 +35,15 @@ func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, logger log.Logg
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterRoomServiceHTTPServer(srv, roomSvc)
+
+	// Register Swagger UI - must be registered before other routes
+	h := openapiv2.NewHandler()
+	srv.HandlePrefix("/q/", h)
+
+	// Handle OPTIONS requests for CORS preflight
+	srv.Route("/").OPTIONS("/*", func(ctx http.Context) error {
+		return ctx.JSON(200, nil)
+	})
 
 	return srv
 }
