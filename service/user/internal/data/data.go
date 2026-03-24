@@ -4,6 +4,7 @@
 package data
 
 import (
+	"fmt"
 	"registration/internal/conf"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
@@ -43,7 +44,8 @@ func NewDB(c *conf.Data) *gorm.DB {
 	if dbName == "" {
 		dbName = "benutzer_db"
 	}
-	dsn := "host=" + dbHost + " user=" + dbUser + " password=" + dbPass + " dbname=" + dbName + " port=" + dbPort + " sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
+		dbHost, dbPort, dbUser, dbPass, dbName)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {

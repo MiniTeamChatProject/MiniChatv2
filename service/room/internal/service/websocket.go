@@ -176,15 +176,15 @@ func NewWebSocketService(hub *WebSocketHub, uc *biz.MessageUsecase, muc *biz.Roo
 
 // HandleWebSocket 处理 WebSocket 连接
 func (s *WebSocketService) HandleWebSocket(ctx http.Context) error {
-	// 从路径参数获取 room_id
-	var params struct {
-		RoomID int64 `path:"room_id"`
-	}
-	if err := ctx.BindQuery(&params); err != nil {
+	// 从路径获取 room_id: /ws/room/{room_id}
+	// 使用 URL 路径解析
+	path := ctx.Request().URL.Path
+	// 路径格式: /ws/room/123
+	var roomID int64
+	_, err := fmt.Sscanf(path, "/ws/room/%d", &roomID)
+	if err != nil || roomID <= 0 {
 		return ctx.JSON(400, map[string]string{"error": "Invalid room ID"})
 	}
-
-	roomID := params.RoomID
 
 	// 获取用户 ID - 支持多种方式
 	// 1. 从请求头获取（API 网关转发）
