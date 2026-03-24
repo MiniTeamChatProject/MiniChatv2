@@ -36,3 +36,10 @@ bin/
 .vscode/
 .idea/
 *.swp
+
+# AI Assistant (Claude Code)
+.claude/
+
+# AI-generated plan files (optional - comment out if you want to track plans)
+# plan.md
+# .plans/
