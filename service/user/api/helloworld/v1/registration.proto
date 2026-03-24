@@ -47,9 +47,15 @@ service Registration {
 //this api is CRETICAL for cross-micoservice remote connexion
   rpc GetProfile (GetProfileReq) returns (GetProfileReply) {
      option (google.api.http) = {
-      get: "/user/profile" // path of HTTP get request 
+      get: "/user/profile" // path of HTTP get request
     };
   }
+
+//----API 3.5: VerifyUser for service-to-service communication----
+  rpc VerifyUser (VerifyUserReq) returns (VerifyUserReply) {}
+
+//----API 3.6: GetUser for service-to-service communication----
+  rpc GetUser (GetUserReq) returns (GetUserReply) {}
 
 //---API 4: deleting user info 
 //you can use this api to delete a user info 
@@ -123,5 +129,28 @@ message UpdateProfileReq{
 }
 message UpdateProfileReply{
   string msg = 1;
+}
+
+// Service-to-service communication messages
+message VerifyUserReq {
+  int64 user_id = 1;
+}
+
+message VerifyUserReply {
+  bool valid = 1;
+  int64 user_id = 2;
+  string username = 3;
+  string nickname = 4;
+}
+
+message GetUserReq {
+  int64 id = 1;
+}
+
+message GetUserReply {
+  int64 id = 1;
+  string username = 2;
+  string nickname = 3;
+  string email = 4;
 }
 

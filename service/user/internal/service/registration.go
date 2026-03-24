@@ -124,3 +124,36 @@ func (s *RegistrationService) UpdateProfile(ctx context.Context, req *pb.UpdateP
     return &pb.UpdateProfileReply{Msg: "The information has been updated successfully !"}, nil
 }
 
+// 8. VerifyUser - 服务间通信接口，验证用户是否存在
+func (s *RegistrationService) VerifyUser(ctx context.Context, req *pb.VerifyUserReq) (*pb.VerifyUserReply, error) {
+	user, err := s.uc.GetProfile(ctx, req.UserId)
+	if err != nil {
+		return &pb.VerifyUserReply{
+			Valid:  false,
+			UserId: req.UserId,
+		}, nil
+	}
+
+	return &pb.VerifyUserReply{
+		Valid:    true,
+		UserId:   user.ID,
+		Username: user.Username,
+		Nickname: user.Nickname,
+	}, nil
+}
+
+// 9. GetUser - 服务间通信接口，获取用户信息
+func (s *RegistrationService) GetUser(ctx context.Context, req *pb.GetUserReq) (*pb.GetUserReply, error) {
+	user, err := s.uc.GetProfile(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetUserReply{
+		Id:       user.ID,
+		Username: user.Username,
+		Nickname: user.Nickname,
+		Email:    user.Email,
+	}, nil
+}
+
