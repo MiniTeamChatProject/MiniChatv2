@@ -93,13 +93,27 @@ Handles user registration, login, JWT token generation, and user profile managem
 - HTTP/gRPC endpoints
 
 ### Key APIs
+
+**Public APIs (HTTP):**
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/register` | POST | User registration |
 | `/login` | POST | User login (returns JWT) |
-| `/user/profile` | GET | Get user profile |
-| `/user/profile` | PUT | Update user profile |
+| `/user/profile` | GET | Get user profile (requires JWT) |
+| `/user/profile` | PUT | Update user profile (requires JWT) |
 | `/user/{id}` | DELETE | Delete user |
+
+**Internal APIs (Service-to-Service):**
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/internal/verify/{user_id}` | GET | Verify user exists (for room service) |
+| `/internal/user/{id}` | GET | Get user details (for room service) |
+
+**gRPC Methods:**
+| Method | Description |
+|--------|-------------|
+| `VerifyUser` | Validate user existence |
+| `GetUser` | Get user information |
 
 ### Quick Commands
 ```bash
@@ -191,9 +205,27 @@ Message format:
 
 ## User-Service Integration
 
-The room service integrates with user service for authentication:
+The room service integrates with user service for authentication and user validation.
 
-### Option 1: API Gateway (Recommended)
+### Current Implementation: HTTP-based Communication
+
+Room service uses HTTP-based communication to call user service internal endpoints:
+
+```go
+// internal/data/user_client.go
+type UserClient struct {
+    baseURL    string  // e.g., "http://user-service:8000"
+    httpClient *http.Client
+}
+```
+
+**User Service Internal Endpoints:**
+- `GET /internal/verify/{user_id}` - Verify user exists, returns user info
+- `GET /internal/user/{id}` - Get detailed user profile
+
+**Note**: These endpoints have graceful fallback behavior in development environments. If the user service is unavailable, the room service returns default user data to prevent blocking.
+
+### Option 1: API Gateway (Recommended for Production)
 ```
 Client → API Gateway (JWT validation) → Room Service
          ↓ adds user headers
@@ -201,20 +233,33 @@ Client → API Gateway (JWT validation) → Room Service
     X-Username: alice
 ```
 
-### Option 2: Direct gRPC Call
-Room service calls user service via gRPC to validate tokens:
+### Option 2: Direct HTTP Call (Current)
+Room service calls user service via HTTP for user validation:
 
 ```go
-// In room service, call user service
-client := pb.NewUserServiceClient(conn)
-user, err := client.VerifyToken(ctx, &pb.VerifyTokenRequest{Token: token})
+// In room service biz layer
+user, err := s.uc.GetUser(ctx, userID)
 ```
 
 ### Implementation Status
-- ✅ Middleware created (`internal/middleware/`)
-- ✅ User context extraction from headers
-- ⚠️ Currently uses hardcoded `user_id = 1` for development
-- TODO: Integrate with user service gRPC client
+- ✅ HTTP UserClient implemented (`internal/data/user_client.go`)
+- ✅ Internal endpoints exposed in user service (`internal/service/registration.go`)
+- ✅ VerifyUser and GetUser gRPC methods implemented
+- ⚠️ Currently uses default user data for development when user service unavailable
+- ✅ Middleware created for user context extraction from headers
+
+### WebSocket Authentication
+
+WebSocket connections accept user identification via:
+- URL parameter: `ws://localhost:8001/ws/room/1?user_id=123`
+- Header: `X-User-ID: 123` (during WebSocket handshake)
+
+**Important**: Kratos HTTP framework's `BindQuery()` does not work with path parameters. Use `fmt.Sscanf` to parse path parameters:
+```go
+path := ctx.Request().URL.Path
+var roomID int64
+_, err := fmt.Sscanf(path, "/ws/room/%d", &roomID)
+```
 
 ## Development Workflow
 
@@ -265,14 +310,24 @@ wscat -c "ws://localhost:8001/ws/room/1"
 
 ## Important Notes
 
-### GORM Version Compatibility
+### Common Issues and Fixes
+
+**1. WebSocket Path Parameter Extraction**
+- Issue: Kratos HTTP framework's `BindQuery()` doesn't work with path parameters
+- Fix: Use `fmt.Sscanf` to parse path parameters directly
+- Location: `service/room/internal/service/websocket.go:HandleWebSocket()`
+
+**2. Database Password Authentication Failed**
+- Issue: PostgreSQL volume created with different password than docker-compose.yml specifies
+- Fix: Reset password directly in PostgreSQL: `docker exec user_db psql -U postgres -c "ALTER USER postgres PASSWORD 'new_password';"`
+
+**3. Proto Package Mismatch (gRPC)**
+- Issue: Room service expected user service gRPC methods in different proto package
+- Fix: Simplified to HTTP-based communication using internal endpoints
+
+**4. GORM Version Compatibility**
 - Room service uses **GORM v1.25.12** for Go 1.24 compatibility
 - Latest GORM requires Go 1.25+
-
-### WebSocket Authentication
-Currently accepts user_id via:
-- URL parameter: `ws://localhost:8001/ws/room/1?user_id=123`
-- Header: `X-User-ID: 123` (during WebSocket handshake)
 
 ### Message Storage
 Messages are stored in the **room service database** (`room_service.messages` table), not in the user database. This is the correct architectural pattern.
