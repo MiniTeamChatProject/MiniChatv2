@@ -1,6 +1,9 @@
 package biz
 
-import "github.com/google/wire"
+import (
+	"github.com/google/wire"
+)
 
 // ProviderSet is biz providers.
-var ProviderSet = wire.NewSet(NewGreeterUsecase)
+// Will be updated when service layer is implemented
+var ProviderSet = wire.NewSet()

@@ -1,15 +1,27 @@
 server:
   http:
     addr: 0.0.0.0:8000
-    timeout: 1s
+    timeout: 10s
+    metadata: true  # Enable Swagger UI
   grpc:
     addr: 0.0.0.0:9000
-    timeout: 1s
+    timeout: 10s
+
 data:
   database:
-    driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
-  redis:
-    addr: 127.0.0.1:6379
-    read_timeout: 0.2s
-    write_timeout: 0.2s
+    driver: postgres
+    source: postgres://minichat:minichat123@localhost:5432/room_service?sslmode=disable
+    max_open_conns: 100
+    max_idle_conns: 10
+    conn_max_lifetime: 300s
+    enable_auto_migrate: true  # Enable auto migration for development
+
+# Redis (optional, for future use)
+# redis:
+#   addr: 127.0.0.1:6379
+#   read_timeout: 0.2s
+#   write_timeout: 0.2s
+
+# Event publisher (to be implemented)
+# event:
+#   type: kafka

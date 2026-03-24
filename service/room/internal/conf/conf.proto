@@ -15,6 +15,7 @@ message Server {
     string network = 1;
     string addr = 2;
     google.protobuf.Duration timeout = 3;
+    bool metadata = 4;  // Enable Swagger UI
   }
   message GRPC {
     string network = 1;
@@ -29,6 +30,10 @@ message Data {
   message Database {
     string driver = 1;
     string source = 2;
+    int32 max_open_conns = 3;
+    int32 max_idle_conns = 4;
+    google.protobuf.Duration conn_max_lifetime = 5;
+    bool enable_auto_migrate = 6;
   }
   message Redis {
     string network = 1;

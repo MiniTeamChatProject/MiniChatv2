@@ -19,8 +19,10 @@
 |------|------|
 | 语言 | Go 1.22+ |
 | 框架 | Kratos v2 |
+| ORM | GORM v2 |
 | 数据库 | PostgreSQL (Docker) |
 | 协议 | gRPC + HTTP |
+| API 文档 | Swagger/OpenAPI 3.0 |
 | 状态同步 | WebSocket (通过网关) |
 
 ---
@@ -92,6 +94,145 @@
 - 2 = 禁言中
 - 3 = 已离开（软删除记录）
 
+### 2.3 GORM 模型定义
+
+```go
+// internal/data/model/room.go
+package model
+
+import "time"
+
+// RoomType 房间类型
+type RoomType int16
+
+const (
+    RoomTypeGroup   RoomType = 1 // 普通群聊
+    RoomTypeVoice   RoomType = 2 // 语音房
+    RoomTypeVideo   RoomType = 3 // 视频房
+    RoomTypeLive    RoomType = 4 // 直播间
+)
+
+// RoomStatus 房间状态
+type RoomStatus int16
+
+const (
+    RoomStatusNormal   RoomStatus = 1 // 正常
+    RoomStatusMuted    RoomStatus = 2 // 禁言
+    RoomStatusBanned   RoomStatus = 3 // 封禁
+)
+
+// Room 房间模型
+type Room struct {
+    ID          int64       `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+    Name        string      `gorm:"column:name;type:varchar(100);not null" json:"name"`
+    OwnerID     int64       `gorm:"column:owner_id;not null;index" json:"owner_id"`
+    Type        RoomType    `gorm:"column:type;type:smallint;not null;default:1" json:"type"`
+    MaxCount    int         `gorm:"column:max_count;type:int;default:500" json:"max_count"`
+    Avatar      string      `gorm:"column:avatar;type:varchar(255)" json:"avatar,omitempty"`
+    Description string      `gorm:"column:description;type:text" json:"description,omitempty"`
+    Tags        string      `gorm:"column:tags;type:varchar(500)" json:"tags,omitempty"`
+    IsPublic    bool        `gorm:"column:is_public;type:boolean;default:true" json:"is_public"`
+    Status      RoomStatus  `gorm:"column:status;type:smallint;default:1" json:"status"`
+    CreatedAt   time.Time   `gorm:"column:created_at;type:timestamptz;default:now()" json:"created_at"`
+    UpdatedAt   time.Time   `gorm:"column:updated_at;type:timestamptz;default:now()" json:"updated_at"`
+
+    // 关联
+    Members     []RoomMember `gorm:"foreignKey:RoomID" json:"members,omitempty"`
+}
+
+// TableName 指定表名
+func (Room) TableName() string {
+    return "rooms"
+}
+
+// MemberRole 成员角色
+type MemberRole int16
+
+const (
+    RoleMember    MemberRole = 1 // 普通成员
+    RoleAdmin     MemberRole = 2 // 管理员
+    RoleOwner     MemberRole = 3 // 房主
+)
+
+// MemberStatus 成员状态
+type MemberStatus int16
+
+const (
+    MemberStatusNormal   MemberStatus = 1 // 正常
+    MemberStatusMuted    MemberStatus = 2 // 禁言中
+    MemberStatusLeft     MemberStatus = 3 // 已离开
+)
+
+// RoomMember 房间成员模型
+type RoomMember struct {
+    ID         int64         `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+    RoomID     int64         `gorm:"column:room_id;not null;uniqueIndex:idx_room_user" json:"room_id"`
+    UserID     int64         `gorm:"column:user_id;not null;uniqueIndex:idx_room_user;index" json:"user_id"`
+    Role       MemberRole    `gorm:"column:role;type:smallint;default:1" json:"role"`
+    Status     MemberStatus  `gorm:"column:status;type:smallint;default:1" json:"status"`
+    MuteUntil  *time.Time    `gorm:"column:mute_until;type:timestamptz" json:"mute_until,omitempty"`
+    JoinedAt   time.Time     `gorm:"column:joined_at;type:timestamptz;default:now()" json:"joined_at"`
+    UpdatedAt  time.Time     `gorm:"column:updated_at;type:timestamptz;default:now()" json:"updated_at"`
+
+    // 关联
+    Room       *Room         `gorm:"foreignKey:RoomID" json:"room,omitempty"`
+}
+
+// TableName 指定表名
+func (RoomMember) TableName() string {
+    return "room_members"
+}
+```
+
+### 2.4 数据库初始化
+
+```go
+// internal/data/data.go
+package data
+
+import (
+    "gorm.io/driver/postgres"
+    "gorm.io/gorm"
+    "gorm.io/gorm/logger"
+    "room/internal/data/model"
+)
+
+type Data struct {
+    db *gorm.DB
+}
+
+// NewData 初始化数据层
+func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
+    // 配置 GORM
+    db, err := gorm.Open(postgres.Open(c.Database.Source), &gorm.Config{
+        Logger: logger.Default.LogMode(logger.Info),
+        NamingStrategy: schema.NamingStrategy{
+            SingularTable: false, // 使用复数表名
+        },
+    })
+    if err != nil {
+        return nil, nil, err
+    }
+
+    // 连接池配置
+    sqlDB, _ := db.DB()
+    sqlDB.SetMaxOpenConns(int(c.Database.MaxOpenConns))
+    sqlDB.SetMaxIdleConns(int(c.Database.MaxIdleConns))
+    sqlDB.SetConnMaxLifetime(c.Database.ConnMaxLifetime.AsDuration())
+
+    // 自动迁移（开发环境）
+    if c.Database.EnableAutoMigrate {
+        db.AutoMigrate(&model.Room{}, &model.RoomMember{})
+    }
+
+    cleanup := func() {
+        sqlDB.Close()
+    }
+
+    return &Data{db: db}, cleanup, nil
+}
+```
+
 ---
 
 ## 3. API 设计
@@ -157,6 +298,78 @@ service RoomService {
 | PUT | /v1/rooms/{id}/members/{user_id}/role | 更新成员角色 |
 | PUT | /v1/rooms/{id}/members/{user_id}/mute | 禁言/解禁 |
 | GET | /v1/users/{user_id}/rooms | 获取用户房间列表 |
+
+### 3.3 Proto 定义与 Swagger 注释
+
+```protobuf
+syntax = "proto3";
+
+package room.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "room/api/room/v1;v1";
+
+// 创建房间请求
+message CreateRoomRequest {
+  string name = 1;
+  int32 type = 2;        // 1:群聊 2:语音房 3:视频房 4:直播间
+  int32 max_count = 3;   // 最大成员数
+  string avatar = 4;
+  string description = 5;
+  repeated string tags = 6;
+  bool is_public = 7;
+}
+
+// 创建房间响应
+message CreateRoomReply {
+  int64 room_id = 1;
+  string name = 2;
+  int64 owner_id = 3;
+}
+
+// 房间信息
+message Room {
+  int64 id = 1;
+  string name = 2;
+  int64 owner_id = 3;
+  int32 type = 4;
+  int32 max_count = 5;
+  int32 current_count = 6;
+  string avatar = 7;
+  string description = 8;
+  repeated string tags = 9;
+  bool is_public = 10;
+  int32 status = 11;
+  int64 created_at = 12;
+}
+
+service RoomService {
+  // 创建房间
+  rpc CreateRoom (CreateRoomRequest) returns (CreateRoomReply) {
+    option (google.api.http) = {
+      post: "/v1/rooms"
+      body: "*"
+    };
+  }
+
+  // 获取房间信息
+  rpc GetRoom (GetRoomRequest) returns (GetRoomReply) {
+    option (google.api.http) = {
+      get: "/v1/rooms/{id}"
+    };
+  }
+}
+```
+
+运行 `make api` 后，Kratos 会自动生成 `openapi.yaml` 文件。
+
+### 3.4 Swagger UI 访问
+
+启动服务后，可通过以下方式访问 API 文档：
+
+- **OpenAPI Spec**: http://localhost:8000/q/openapi.yaml
+- **Swagger UI**: 通过 Kratos 的 swagger 中间件访问
 
 ---
 
@@ -262,9 +475,12 @@ room-service
 - [ ] 基础项目结构调整
 
 ### Phase 2: 数据层
-- [ ] 数据库表创建
-- [ ] Data 层 Repository 实现
-- [ ] 数据库连接池配置
+- [ ] GORM 模型定义 (`internal/data/model/`)
+- [ ] 数据库初始化与连接池配置
+- [ ] Repository 接口定义 (`internal/biz/`)
+- [ ] Repository 实现 (`internal/data/`)
+  - [ ] RoomRepository
+  - [ ] RoomMemberRepository
 
 ### Phase 3: 业务层
 - [ ] Biz 层用例实现
@@ -272,9 +488,11 @@ room-service
 - [ ] 事件发布机制
 
 ### Phase 4: 服务层
-- [ ] Proto 定义生成
-- [ ] Service 层实现
+- [ ] Proto 定义编写 (`api/room/v1/`)
+- [ ] 运行 `make api` 生成代码
+- [ ] Service 层实现 (`internal/service/`)
 - [ ] HTTP/gRPC 服务注册
+- [ ] Swagger UI 集成与测试
 
 ### Phase 5: 测试与优化
 - [ ] 单元测试
@@ -311,6 +529,8 @@ server:
   http:
     addr: 0.0.0.0:8000
     timeout: 10s
+    # Swagger UI 配置
+    metadata: true
   grpc:
     addr: 0.0.0.0:9000
     timeout: 10s
@@ -322,9 +542,72 @@ data:
     max_open_conns: 100
     max_idle_conns: 10
     conn_max_lifetime: 300s
+    # 开发环境启用自动迁移（生产环境建议关闭）
+    enable_auto_migrate: true
 
 # 事件发布配置（待定）
 event:
   type: kafka  # or rabbitmq, redis
   # ...
 ```
+
+### 7.3 HTTP Server 配置 (internal/server/http.go)
+
+```go
+package server
+
+import (
+    v1 "room/api/room/v1"
+    "room/internal/conf"
+    "room/internal/service"
+
+    "github.com/go-kratos/kratos/v2/log"
+    "github.com/go-kratos/kratos/v2/middleware/recovery"
+    "github.com/go-kratos/kratos/v2/middleware/selector"
+    "github.com/go-kratos/kratos/v2/transport/http"
+    "github.com/go-kratos/swagger-api" // Swagger UI 中间件
+)
+
+// NewHTTPServer 创建 HTTP 服务器
+func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, logger log.Logger) *http.Server {
+    var opts = []http.ServerOption{
+        http.Middleware(
+            recovery.Recovery(),
+        ),
+    }
+    if c.Http.Network != "" {
+        opts = append(opts, http.Network(c.Http.Network))
+    }
+    if c.Http.Addr != "" {
+        opts = append(opts, http.Address(c.Http.Addr))
+    }
+    if c.Http.Timeout != nil {
+        opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
+    }
+
+    srv := http.NewServer(opts...)
+
+    // 注册 gRPC-Gateway
+    v1.RegisterRoomServiceHTTPServer(srv, roomSvc)
+
+    // 启用 Swagger UI
+    if c.Http.Metadata {
+        srv.Route("/").GET(swagger.UIHandler)
+    }
+
+    return srv
+}
+```
+
+### 7.4 依赖安装
+
+```bash
+# GORM
+go get -u gorm.io/gorm
+go get -u gorm.io/driver/postgres
+
+# Swagger UI (Kratos 集成)
+go get -u github.com/go-kratos/swagger-api
+```
+
+---

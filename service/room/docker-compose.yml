@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: minichat-room-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: minichat
+      POSTGRES_PASSWORD: minichat123
+      POSTGRES_DB: room_service
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minichat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
