@@ -126,39 +126,14 @@ curl http://localhost:8000/q/openapi.yaml -o openapi.yaml
 
 #### 方式二：本地 Swagger UI（推荐）
 
-1. 安装 Swagger UI 依赖：
-```bash
-go get -u github.com/go-kratos/swagger-api
-```
+服务启动后，直接在浏览器中访问：
 
-2. 更新 `internal/server/http.go`：
+**http://localhost:8000/q/**
 
-```go
-import (
-    swaggerAPI "github.com/go-kratos/swagger-api"
-    ...
-)
-
-func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, logger log.Logger) *http.Server {
-    srv := http.NewServer(opts...)
-    v1.RegisterRoomServiceHTTPServer(srv, roomSvc)
-
-    // 添加 Swagger UI
-    if c.Http.Metadata {
-        srv.Route("/swagger").GET(swaggerAPI.UIHandler())
-    }
-
-    return srv
-}
-```
-
-3. 重新构建并访问：
-```bash
-make build
-./bin/room -conf ./configs
-```
-
-访问：**http://localhost:8000/swagger/**
+这是最简单的方式，无需额外配置。Swagger UI 已内置集成，支持：
+- 查看所有 API 文档
+- 在浏览器中直接测试 API
+- 查看请求/响应示例
 
 #### 方式三：使用第三方工具
 
