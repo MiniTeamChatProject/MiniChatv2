@@ -9,8 +9,11 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+	"room/internal/biz"
 	"room/internal/conf"
+	"room/internal/data"
 	"room/internal/server"
+	"room/internal/service"
 )
 
 import (
@@ -19,10 +22,20 @@ import (
 
 // Injectors from wire.go:
 
-func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	grpcServer := server.NewGRPCServer(confServer, logger)
-	httpServer := server.NewHTTPServer(confServer, logger)
+func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+	dataData, cleanup, err := data.NewData(confData, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	roomRepository := data.NewRoomRepo(dataData)
+	roomUsecase := biz.NewRoomUsecase(roomRepository, logger)
+	roomMemberRepository := data.NewRoomMemberRepo(dataData)
+	roomMemberUsecase := biz.NewRoomMemberUsecase(roomMemberRepository, roomRepository, logger)
+	roomService := service.NewRoomService(roomUsecase, roomMemberUsecase, logger)
+	grpcServer := server.NewGRPCServer(confServer, roomService, logger)
+	httpServer := server.NewHTTPServer(confServer, roomService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
+		cleanup()
 	}, nil
 }

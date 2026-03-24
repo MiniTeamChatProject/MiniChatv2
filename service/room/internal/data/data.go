@@ -13,7 +13,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData) // NewRoomRepo, NewRoomMemberRepo will be added when services are implemented
+var ProviderSet = wire.NewSet(NewData, NewRoomRepo, NewRoomMemberRepo)
 
 // Data .
 type Data struct {
@@ -63,16 +63,4 @@ func NewData(c *conf.Data, l log.Logger) (*Data, func(), error) {
 // DB returns the GORM database instance
 func (d *Data) DB() *gorm.DB {
 	return d.db
-}
-
-// NewRoomRepo creates a room repository
-func NewRoomRepo(data *Data) interface{} {
-	// Will return biz.RoomRepository when service is implemented
-	return nil
-}
-
-// NewRoomMemberRepo creates a room member repository
-func NewRoomMemberRepo(data *Data) interface{} {
-	// Will return biz.RoomMemberRepository when service is implemented
-	return nil
 }

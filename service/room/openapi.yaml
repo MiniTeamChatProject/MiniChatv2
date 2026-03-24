@@ -3,15 +3,13 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
-    description: The greeting service definition.
+    title: ""
     version: 0.0.1
 paths:
     /helloworld/{name}:
         get:
             tags:
                 - Greeter
-                - subgroup
             description: Sends a greeting
             operationId: Greeter_SayHello
             parameters:
@@ -27,6 +25,278 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /v1/rooms:
+        post:
+            tags:
+                - RoomService
+            description: 创建房间
+            operationId: RoomService_CreateRoom
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/room.v1.CreateRoomRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.CreateRoomReply'
+    /v1/rooms/{id}:
+        get:
+            tags:
+                - RoomService
+            description: 获取房间信息
+            operationId: RoomService_GetRoom
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.GetRoomReply'
+        put:
+            tags:
+                - RoomService
+            description: 更新房间信息
+            operationId: RoomService_UpdateRoom
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/room.v1.UpdateRoomRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.UpdateRoomReply'
+        delete:
+            tags:
+                - RoomService
+            description: 删除房间
+            operationId: RoomService_DeleteRoom
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.DeleteRoomReply'
+    /v1/rooms/{roomId}/join:
+        post:
+            tags:
+                - RoomService
+            description: 加入房间
+            operationId: RoomService_JoinRoom
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/room.v1.JoinRoomRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.JoinRoomReply'
+    /v1/rooms/{roomId}/leave:
+        post:
+            tags:
+                - RoomService
+            description: 退出房间
+            operationId: RoomService_LeaveRoom
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/room.v1.LeaveRoomRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.LeaveRoomReply'
+    /v1/rooms/{roomId}/members:
+        get:
+            tags:
+                - RoomService
+            description: 获取房间成员列表
+            operationId: RoomService_ListMembers
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.ListMembersReply'
+    /v1/rooms/{roomId}/members/{userId}:
+        delete:
+            tags:
+                - RoomService
+            description: 踢出成员
+            operationId: RoomService_KickMember
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.KickMemberReply'
+    /v1/rooms/{roomId}/members/{userId}/mute:
+        put:
+            tags:
+                - RoomService
+            description: 禁言/解禁成员
+            operationId: RoomService_MuteMember
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/room.v1.MuteMemberRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.MuteMemberReply'
+    /v1/rooms/{roomId}/members/{userId}/role:
+        put:
+            tags:
+                - RoomService
+            description: 更新成员角色
+            operationId: RoomService_UpdateMemberRole
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/room.v1.UpdateMemberRoleRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.UpdateMemberRoleReply'
+    /v1/users/{userId}/rooms:
+        get:
+            tags:
+                - RoomService
+            description: 获取用户加入的房间列表
+            operationId: RoomService_ListUserRooms
+            parameters:
+                - name: userId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.ListUserRoomsReply'
 components:
     schemas:
         helloworld.v1.HelloReply:
@@ -35,5 +305,217 @@ components:
                 message:
                     type: string
             description: The response message containing the greetings
+        room.v1.CreateRoomReply:
+            type: object
+            properties:
+                room:
+                    $ref: '#/components/schemas/room.v1.Room'
+            description: 创建房间响应
+        room.v1.CreateRoomRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                type:
+                    type: integer
+                    format: enum
+                maxCount:
+                    type: integer
+                    format: int32
+                avatar:
+                    type: string
+                description:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                isPublic:
+                    type: boolean
+            description: 创建房间请求
+        room.v1.DeleteRoomReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            description: 删除房间响应
+        room.v1.GetRoomReply:
+            type: object
+            properties:
+                room:
+                    $ref: '#/components/schemas/room.v1.Room'
+            description: 获取房间响应
+        room.v1.JoinRoomReply:
+            type: object
+            properties:
+                member:
+                    $ref: '#/components/schemas/room.v1.RoomMember'
+                room:
+                    $ref: '#/components/schemas/room.v1.Room'
+            description: 加入房间响应
+        room.v1.JoinRoomRequest:
+            type: object
+            properties:
+                roomId:
+                    type: string
+            description: 加入房间请求
+        room.v1.KickMemberReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            description: 踢出成员响应
+        room.v1.LeaveRoomReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            description: 退出房间响应
+        room.v1.LeaveRoomRequest:
+            type: object
+            properties:
+                roomId:
+                    type: string
+            description: 退出房间请求
+        room.v1.ListMembersReply:
+            type: object
+            properties:
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/room.v1.RoomMember'
+                total:
+                    type: integer
+                    format: int32
+            description: 获取成员列表响应
+        room.v1.ListUserRoomsReply:
+            type: object
+            properties:
+                rooms:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/room.v1.Room'
+                total:
+                    type: integer
+                    format: int32
+            description: 获取用户房间列表响应
+        room.v1.MuteMemberReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            description: 禁言/解禁成员响应
+        room.v1.MuteMemberRequest:
+            type: object
+            properties:
+                roomId:
+                    type: string
+                userId:
+                    type: string
+                muteUntil:
+                    type: string
+            description: 禁言/解禁成员请求
+        room.v1.Room:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                ownerId:
+                    type: string
+                type:
+                    type: integer
+                    format: enum
+                maxCount:
+                    type: integer
+                    format: int32
+                currentCount:
+                    type: integer
+                    format: int32
+                avatar:
+                    type: string
+                description:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                isPublic:
+                    type: boolean
+                status:
+                    type: integer
+                    format: enum
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: 房间信息
+        room.v1.RoomMember:
+            type: object
+            properties:
+                id:
+                    type: string
+                roomId:
+                    type: string
+                userId:
+                    type: string
+                role:
+                    type: integer
+                    format: enum
+                status:
+                    type: integer
+                    format: enum
+                muteUntil:
+                    type: string
+                joinedAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: 房间成员信息
+        room.v1.UpdateMemberRoleReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            description: 更新成员角色响应
+        room.v1.UpdateMemberRoleRequest:
+            type: object
+            properties:
+                roomId:
+                    type: string
+                userId:
+                    type: string
+                role:
+                    type: integer
+                    format: enum
+            description: 更新成员角色请求
+        room.v1.UpdateRoomReply:
+            type: object
+            properties:
+                room:
+                    $ref: '#/components/schemas/room.v1.Room'
+            description: 更新房间响应
+        room.v1.UpdateRoomRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                avatar:
+                    type: string
+                description:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+                isPublic:
+                    type: boolean
+            description: 更新房间请求
 tags:
     - name: Greeter
+      description: The greeting service definition.
+    - name: RoomService
+      description: 房间服务

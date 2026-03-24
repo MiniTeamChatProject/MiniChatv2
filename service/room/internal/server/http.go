@@ -1,7 +1,9 @@
 package server
 
 import (
+	v1 "room/api/room/v1"
 	"room/internal/conf"
+	"room/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -9,7 +11,7 @@ import (
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -25,12 +27,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger) *http.Server {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	// Services will be registered here when implemented
-
-	// Enable Swagger UI if metadata is enabled
-	if c.Http.Metadata {
-		// Swagger will be enabled here when API is implemented
-	}
+	v1.RegisterRoomServiceHTTPServer(srv, roomSvc)
 
 	return srv
 }

@@ -1,0 +1,288 @@
+syntax = "proto3";
+
+package room.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "room/api/room/v1;v1";
+
+// 房间类型
+enum RoomType {
+  ROOM_TYPE_UNKNOWN = 0;
+  ROOM_TYPE_GROUP = 1;   // 普通群聊
+  ROOM_TYPE_VOICE = 2;   // 语音房
+  ROOM_TYPE_VIDEO = 3;   // 视频房
+  ROOM_TYPE_LIVE = 4;    // 直播间
+}
+
+// 房间状态
+enum RoomStatus {
+  ROOM_STATUS_UNKNOWN = 0;
+  ROOM_STATUS_NORMAL = 1;  // 正常
+  ROOM_STATUS_MUTED = 2;   // 禁言
+  ROOM_STATUS_BANNED = 3;  // 封禁
+}
+
+// 成员角色
+enum MemberRole {
+  ROLE_UNKNOWN = 0;
+  ROLE_MEMBER = 1;  // 普通成员
+  ROLE_ADMIN = 2;   // 管理员
+  ROLE_OWNER = 3;   // 房主
+}
+
+// 成员状态
+enum MemberStatus {
+  MEMBER_STATUS_UNKNOWN = 0;
+  MEMBER_STATUS_NORMAL = 1;  // 正常
+  MEMBER_STATUS_MUTED = 2;   // 禁言中
+  MEMBER_STATUS_LEFT = 3;    // 已离开
+}
+
+// 房间信息
+message Room {
+  int64 id = 1;
+  string name = 2;
+  int64 owner_id = 3;
+  RoomType type = 4;
+  int32 max_count = 5;
+  int32 current_count = 6;
+  string avatar = 7;
+  string description = 8;
+  repeated string tags = 9;
+  bool is_public = 10;
+  RoomStatus status = 11;
+  int64 created_at = 12;
+  int64 updated_at = 13;
+}
+
+// 房间成员信息
+message RoomMember {
+  int64 id = 1;
+  int64 room_id = 2;
+  int64 user_id = 3;
+  MemberRole role = 4;
+  MemberStatus status = 5;
+  int64 mute_until = 6;  // Unix timestamp, 0 means not muted
+  int64 joined_at = 7;
+  int64 updated_at = 8;
+}
+
+// 创建房间请求
+message CreateRoomRequest {
+  string name = 1;
+  RoomType type = 2;
+  int32 max_count = 3;
+  string avatar = 4;
+  string description = 5;
+  repeated string tags = 6;
+  bool is_public = 7;
+}
+
+// 创建房间响应
+message CreateRoomReply {
+  Room room = 1;
+}
+
+// 获取房间请求
+message GetRoomRequest {
+  int64 id = 1;
+}
+
+// 获取房间响应
+message GetRoomReply {
+  Room room = 1;
+}
+
+// 更新房间请求
+message UpdateRoomRequest {
+  int64 id = 1;
+  string name = 2;
+  string avatar = 3;
+  string description = 4;
+  repeated string tags = 5;
+  bool is_public = 6;
+}
+
+// 更新房间响应
+message UpdateRoomReply {
+  Room room = 1;
+}
+
+// 删除房间请求
+message DeleteRoomRequest {
+  int64 id = 1;
+}
+
+// 删除房间响应
+message DeleteRoomReply {
+  bool success = 1;
+}
+
+// 加入房间请求
+message JoinRoomRequest {
+  int64 room_id = 1;
+}
+
+// 加入房间响应
+message JoinRoomReply {
+  RoomMember member = 1;
+  Room room = 2;
+}
+
+// 退出房间请求
+message LeaveRoomRequest {
+  int64 room_id = 1;
+}
+
+// 退出房间响应
+message LeaveRoomReply {
+  bool success = 1;
+}
+
+// 获取成员列表请求
+message ListMembersRequest {
+  int64 room_id = 1;
+  int32 page = 2;      // Page number, default 1
+  int32 page_size = 3; // Page size, default 50, max 100
+}
+
+// 获取成员列表响应
+message ListMembersReply {
+  repeated RoomMember members = 1;
+  int32 total = 2;
+}
+
+// 踢出成员请求
+message KickMemberRequest {
+  int64 room_id = 1;
+  int64 user_id = 2;
+}
+
+// 踢出成员响应
+message KickMemberReply {
+  bool success = 1;
+}
+
+// 更新成员角色请求
+message UpdateMemberRoleRequest {
+  int64 room_id = 1;
+  int64 user_id = 2;
+  MemberRole role = 3;
+}
+
+// 更新成员角色响应
+message UpdateMemberRoleReply {
+  bool success = 1;
+}
+
+// 禁言/解禁成员请求
+message MuteMemberRequest {
+  int64 room_id = 1;
+  int64 user_id = 2;
+  int64 mute_until = 3;  // Unix timestamp, 0 means unmute
+}
+
+// 禁言/解禁成员响应
+message MuteMemberReply {
+  bool success = 1;
+}
+
+// 获取用户房间列表请求
+message ListUserRoomsRequest {
+  int64 user_id = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+// 获取用户房间列表响应
+message ListUserRoomsReply {
+  repeated Room rooms = 1;
+  int32 total = 2;
+}
+
+// 房间服务
+service RoomService {
+  // 创建房间
+  rpc CreateRoom (CreateRoomRequest) returns (CreateRoomReply) {
+    option (google.api.http) = {
+      post: "/v1/rooms"
+      body: "*"
+    };
+  }
+
+  // 获取房间信息
+  rpc GetRoom (GetRoomRequest) returns (GetRoomReply) {
+    option (google.api.http) = {
+      get: "/v1/rooms/{id}"
+    };
+  }
+
+  // 更新房间信息
+  rpc UpdateRoom (UpdateRoomRequest) returns (UpdateRoomReply) {
+    option (google.api.http) = {
+      put: "/v1/rooms/{id}"
+      body: "*"
+    };
+  }
+
+  // 删除房间
+  rpc DeleteRoom (DeleteRoomRequest) returns (DeleteRoomReply) {
+    option (google.api.http) = {
+      delete: "/v1/rooms/{id}"
+    };
+  }
+
+  // 加入房间
+  rpc JoinRoom (JoinRoomRequest) returns (JoinRoomReply) {
+    option (google.api.http) = {
+      post: "/v1/rooms/{room_id}/join"
+      body: "*"
+    };
+  }
+
+  // 退出房间
+  rpc LeaveRoom (LeaveRoomRequest) returns (LeaveRoomReply) {
+    option (google.api.http) = {
+      post: "/v1/rooms/{room_id}/leave"
+      body: "*"
+    };
+  }
+
+  // 获取房间成员列表
+  rpc ListMembers (ListMembersRequest) returns (ListMembersReply) {
+    option (google.api.http) = {
+      get: "/v1/rooms/{room_id}/members"
+    };
+  }
+
+  // 踢出成员
+  rpc KickMember (KickMemberRequest) returns (KickMemberReply) {
+    option (google.api.http) = {
+      delete: "/v1/rooms/{room_id}/members/{user_id}"
+    };
+  }
+
+  // 更新成员角色
+  rpc UpdateMemberRole (UpdateMemberRoleRequest) returns (UpdateMemberRoleReply) {
+    option (google.api.http) = {
+      put: "/v1/rooms/{room_id}/members/{user_id}/role"
+      body: "*"
+    };
+  }
+
+  // 禁言/解禁成员
+  rpc MuteMember (MuteMemberRequest) returns (MuteMemberReply) {
+    option (google.api.http) = {
+      put: "/v1/rooms/{room_id}/members/{user_id}/mute"
+      body: "*"
+    };
+  }
+
+  // 获取用户加入的房间列表
+  rpc ListUserRooms (ListUserRoomsRequest) returns (ListUserRoomsReply) {
+    option (google.api.http) = {
+      get: "/v1/users/{user_id}/rooms"
+    };
+  }
+}
