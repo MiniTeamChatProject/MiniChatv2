@@ -13,7 +13,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewRoomRepo, NewRoomMemberRepo)
+var ProviderSet = wire.NewSet(NewData, NewRoomRepo, NewRoomMemberRepo, NewMessageRepo)
 
 // Data .
 type Data struct {
@@ -46,7 +46,7 @@ func NewData(c *conf.Data, l log.Logger) (*Data, func(), error) {
 	if c.Database.EnableAutoMigrate {
 		helper := log.NewHelper(l)
 		helper.Info("Enabling auto migration")
-		if err := db.AutoMigrate(&model.Room{}, &model.RoomMember{}); err != nil {
+		if err := db.AutoMigrate(&model.Room{}, &model.RoomMember{}, &model.Message{}); err != nil {
 			return nil, nil, fmt.Errorf("failed to auto migrate: %w", err)
 		}
 	}

@@ -13,7 +13,7 @@ import (
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, wsSvc *service.WebSocketService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -39,6 +39,9 @@ func NewHTTPServer(c *conf.Server, roomSvc *service.RoomService, logger log.Logg
 	// Register Swagger UI - must be registered before other routes
 	h := openapiv2.NewHandler()
 	srv.HandlePrefix("/q/", h)
+
+	// Register WebSocket route
+	srv.Route("/ws").GET("/room/{room_id}", wsSvc.HandleWebSocket)
 
 	// Handle OPTIONS requests for CORS preflight
 	srv.Route("/").OPTIONS("/*", func(ctx http.Context) error {

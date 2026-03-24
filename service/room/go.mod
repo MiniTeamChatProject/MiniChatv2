@@ -9,6 +9,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/go-kratos/swagger-api v1.0.1
 	github.com/google/wire v0.6.0
+	github.com/gorilla/websocket v1.5.3
 	go.uber.org/automaxprocs v1.5.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20250102185135-69823020774d
 	google.golang.org/grpc v1.69.2

@@ -280,6 +280,11 @@ func (uc *RoomMemberUsecase) ListMembers(ctx context.Context, roomID int64, page
 	return uc.memberRepo.List(ctx, roomID, pageSize, offset)
 }
 
+// Get 获取成员信息
+func (uc *RoomMemberUsecase) Get(ctx context.Context, roomID, userID int64) (*RoomMember, error) {
+	return uc.memberRepo.Get(ctx, roomID, userID)
+}
+
 // checkRoomAvailability 检查房间是否可用
 func (uc *RoomMemberUsecase) checkRoomAvailability(ctx context.Context, roomID int64) error {
 	room, err := uc.roomRepo.Get(ctx, roomID)

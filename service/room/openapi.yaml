@@ -291,6 +291,59 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/room.v1.UpdateMemberRoleReply'
+    /v1/rooms/{roomId}/messages:
+        get:
+            tags:
+                - RoomService
+            description: 获取消息历史
+            operationId: RoomService_GetMessages
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.GetMessagesReply'
+        post:
+            tags:
+                - RoomService
+            description: 发送消息
+            operationId: RoomService_SendMessage
+            parameters:
+                - name: roomId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/room.v1.SendMessageRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/room.v1.SendMessageReply'
     /v1/users/{userId}/rooms:
         get:
             tags:
@@ -362,6 +415,17 @@ components:
                 success:
                     type: boolean
             description: 删除房间响应
+        room.v1.GetMessagesReply:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/room.v1.Message'
+                total:
+                    type: integer
+                    format: int32
+            description: 获取消息历史响应
         room.v1.GetRoomReply:
             type: object
             properties:
@@ -433,6 +497,23 @@ components:
                     type: integer
                     format: int32
             description: 获取用户房间列表响应
+        room.v1.Message:
+            type: object
+            properties:
+                id:
+                    type: string
+                roomId:
+                    type: string
+                userId:
+                    type: string
+                type:
+                    type: integer
+                    format: enum
+                content:
+                    type: string
+                createdAt:
+                    type: string
+            description: 消息信息
         room.v1.MuteMemberReply:
             type: object
             properties:
@@ -507,6 +588,23 @@ components:
                 updatedAt:
                     type: string
             description: 房间成员信息
+        room.v1.SendMessageReply:
+            type: object
+            properties:
+                message:
+                    $ref: '#/components/schemas/room.v1.Message'
+            description: 发送消息响应
+        room.v1.SendMessageRequest:
+            type: object
+            properties:
+                roomId:
+                    type: string
+                content:
+                    type: string
+                type:
+                    type: integer
+                    format: enum
+            description: 发送消息请求
         room.v1.UpdateMemberRoleReply:
             type: object
             properties:

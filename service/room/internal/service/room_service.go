@@ -5,6 +5,7 @@ import (
 	"time"
 	"room/api/room/v1"
 	"room/internal/biz"
+	"room/internal/middleware"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -15,22 +16,29 @@ type RoomService struct {
 
 	uc  *biz.RoomUsecase
 	muc *biz.RoomMemberUsecase
+	msguc *biz.MessageUsecase
 	log *log.Helper
 }
 
 // NewRoomService 创建房间服务
-func NewRoomService(uc *biz.RoomUsecase, muc *biz.RoomMemberUsecase, logger log.Logger) *RoomService {
+func NewRoomService(uc *biz.RoomUsecase, muc *biz.RoomMemberUsecase, msguc *biz.MessageUsecase, logger log.Logger) *RoomService {
 	return &RoomService{
 		uc:  uc,
 		muc: muc,
+		msguc: msguc,
 		log: log.NewHelper(logger),
 	}
 }
 
 // CreateRoom 创建房间
 func (s *RoomService) CreateRoom(ctx context.Context, req *v1.CreateRoomRequest) (*v1.CreateRoomReply, error) {
-	// TODO: 从 context 中获取 user_id
-	userID := int64(1) // 临时硬编码
+	// 从 context 中获取 user_id
+	userID := middleware.GetUserIDFromContext(ctx)
+	if userID == 0 {
+		// 开发环境默认使用 user_id=1，生产环境应返回错误
+		userID = int64(1)
+		s.log.Warnf("No user ID in context, using default: %d", userID)
+	}
 
 	room := &biz.Room{
 		Name:        req.Name,
@@ -109,8 +117,12 @@ func (s *RoomService) DeleteRoom(ctx context.Context, req *v1.DeleteRoomRequest)
 
 // JoinRoom 加入房间
 func (s *RoomService) JoinRoom(ctx context.Context, req *v1.JoinRoomRequest) (*v1.JoinRoomReply, error) {
-	// TODO: 从 context 中获取 user_id
-	userID := int64(1) // 临时硬编码
+	// 从 context 中获取 user_id
+	userID := middleware.GetUserIDFromContext(ctx)
+	if userID == 0 {
+		userID = int64(1) // 开发环境默认值
+		s.log.Warnf("No user ID in context, using default: %d", userID)
+	}
 
 	member, err := s.muc.Join(ctx, req.RoomId, userID)
 	if err != nil {
@@ -127,8 +139,12 @@ func (s *RoomService) JoinRoom(ctx context.Context, req *v1.JoinRoomRequest) (*v
 
 // LeaveRoom 退出房间
 func (s *RoomService) LeaveRoom(ctx context.Context, req *v1.LeaveRoomRequest) (*v1.LeaveRoomReply, error) {
-	// TODO: 从 context 中获取 user_id
-	userID := int64(1) // 临时硬编码
+	// 从 context 中获取 user_id
+	userID := middleware.GetUserIDFromContext(ctx)
+	if userID == 0 {
+		userID = int64(1) // 开发环境默认值
+		s.log.Warnf("No user ID in context, using default: %d", userID)
+	}
 
 	err := s.muc.Leave(ctx, req.RoomId, userID)
 	if err != nil {
@@ -254,6 +270,46 @@ func (s *RoomService) ListAllRooms(ctx context.Context, req *v1.ListAllRoomsRequ
 	}, nil
 }
 
+// SendMessage 发送消息
+func (s *RoomService) SendMessage(ctx context.Context, req *v1.SendMessageRequest) (*v1.SendMessageReply, error) {
+	// 从 context 中获取 user_id
+	userID := middleware.GetUserIDFromContext(ctx)
+	if userID == 0 {
+		userID = int64(1) // 开发环境默认值
+		s.log.Warnf("No user ID in context, using default: %d", userID)
+	}
+
+	message, err := s.msguc.Send(ctx, req.RoomId, userID, req.Content, biz.MessageType(req.Type))
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.SendMessageReply{
+		Message: s.toProtoMessage(message),
+	}, nil
+}
+
+// GetMessages 获取消息历史
+func (s *RoomService) GetMessages(ctx context.Context, req *v1.GetMessagesRequest) (*v1.GetMessagesReply, error) {
+	page := int(req.Page)
+	pageSize := int(req.PageSize)
+
+	messages, total, err := s.msguc.ListMessages(ctx, req.RoomId, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	protoMessages := make([]*v1.Message, len(messages))
+	for i, m := range messages {
+		protoMessages[i] = s.toProtoMessage(m)
+	}
+
+	return &v1.GetMessagesReply{
+		Messages: protoMessages,
+		Total:    int32(total),
+	}, nil
+}
+
 // toProtoRoom 转换为 Proto 模型
 func (s *RoomService) toProtoRoom(r *biz.Room) *v1.Room {
 	if r == nil {
@@ -294,5 +350,20 @@ func (s *RoomService) toProtoMember(m *biz.RoomMember) *v1.RoomMember {
 		MuteUntil: muteUntil,
 		JoinedAt:  m.JoinedAt.Unix(),
 		UpdatedAt: m.UpdatedAt.Unix(),
+	}
+}
+
+// toProtoMessage 转换为 Proto 模型
+func (s *RoomService) toProtoMessage(m *biz.Message) *v1.Message {
+	if m == nil {
+		return nil
+	}
+	return &v1.Message{
+		Id:        m.ID,
+		RoomId:    m.RoomID,
+		UserId:    m.UserID,
+		Type:      v1.MessageType(m.Type),
+		Content:   m.Content,
+		CreatedAt: m.CreatedAt.Unix(),
 	}
 }

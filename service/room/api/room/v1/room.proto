@@ -39,6 +39,15 @@ enum MemberStatus {
   MEMBER_STATUS_LEFT = 3;    // 已离开
 }
 
+// 消息类型
+enum MessageType {
+  MESSAGE_TYPE_UNKNOWN = 0;
+  MESSAGE_TYPE_TEXT = 1;   // 文本消息
+  MESSAGE_TYPE_IMAGE = 2;  // 图片消息（预留）
+  MESSAGE_TYPE_VOICE = 3;  // 语音消息（预留）
+  MESSAGE_TYPE_VIDEO = 4;  // 视频消息（预留）
+}
+
 // 房间信息
 message Room {
   int64 id = 1;
@@ -213,6 +222,41 @@ message ListAllRoomsReply {
   int32 total = 2;
 }
 
+// 消息信息
+message Message {
+  int64 id = 1;
+  int64 room_id = 2;
+  int64 user_id = 3;
+  MessageType type = 4;
+  string content = 5;
+  int64 created_at = 6;
+}
+
+// 发送消息请求
+message SendMessageRequest {
+  int64 room_id = 1;
+  string content = 2;
+  MessageType type = 3;  // 默认为文本消息
+}
+
+// 发送消息响应
+message SendMessageReply {
+  Message message = 1;
+}
+
+// 获取消息历史请求
+message GetMessagesRequest {
+  int64 room_id = 1;
+  int32 page = 2;       // Page number, default 1
+  int32 page_size = 3;  // Page size, default 50, max 100
+}
+
+// 获取消息历史响应
+message GetMessagesReply {
+  repeated Message messages = 1;
+  int32 total = 2;
+}
+
 // 房间服务
 service RoomService {
   // 创建房间
@@ -302,6 +346,21 @@ service RoomService {
   rpc ListAllRooms (ListAllRoomsRequest) returns (ListAllRoomsReply) {
     option (google.api.http) = {
       get: "/v1/rooms"
+    };
+  }
+
+  // 发送消息
+  rpc SendMessage (SendMessageRequest) returns (SendMessageReply) {
+    option (google.api.http) = {
+      post: "/v1/rooms/{room_id}/messages"
+      body: "*"
+    };
+  }
+
+  // 获取消息历史
+  rpc GetMessages (GetMessagesRequest) returns (GetMessagesReply) {
+    option (google.api.http) = {
+      get: "/v1/rooms/{room_id}/messages"
     };
   }
 }

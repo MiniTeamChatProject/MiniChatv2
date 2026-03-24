@@ -31,6 +31,8 @@ const (
 	RoomService_MuteMember_FullMethodName       = "/room.v1.RoomService/MuteMember"
 	RoomService_ListUserRooms_FullMethodName    = "/room.v1.RoomService/ListUserRooms"
 	RoomService_ListAllRooms_FullMethodName     = "/room.v1.RoomService/ListAllRooms"
+	RoomService_SendMessage_FullMethodName      = "/room.v1.RoomService/SendMessage"
+	RoomService_GetMessages_FullMethodName      = "/room.v1.RoomService/GetMessages"
 )
 
 // RoomServiceClient is the client API for RoomService service.
@@ -63,6 +65,10 @@ type RoomServiceClient interface {
 	ListUserRooms(ctx context.Context, in *ListUserRoomsRequest, opts ...grpc.CallOption) (*ListUserRoomsReply, error)
 	// 获取所有房间列表
 	ListAllRooms(ctx context.Context, in *ListAllRoomsRequest, opts ...grpc.CallOption) (*ListAllRoomsReply, error)
+	// 发送消息
+	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageReply, error)
+	// 获取消息历史
+	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesReply, error)
 }
 
 type roomServiceClient struct {
@@ -193,6 +199,26 @@ func (c *roomServiceClient) ListAllRooms(ctx context.Context, in *ListAllRoomsRe
 	return out, nil
 }
 
+func (c *roomServiceClient) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendMessageReply)
+	err := c.cc.Invoke(ctx, RoomService_SendMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *roomServiceClient) GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMessagesReply)
+	err := c.cc.Invoke(ctx, RoomService_GetMessages_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RoomServiceServer is the server API for RoomService service.
 // All implementations must embed UnimplementedRoomServiceServer
 // for forward compatibility.
@@ -223,6 +249,10 @@ type RoomServiceServer interface {
 	ListUserRooms(context.Context, *ListUserRoomsRequest) (*ListUserRoomsReply, error)
 	// 获取所有房间列表
 	ListAllRooms(context.Context, *ListAllRoomsRequest) (*ListAllRoomsReply, error)
+	// 发送消息
+	SendMessage(context.Context, *SendMessageRequest) (*SendMessageReply, error)
+	// 获取消息历史
+	GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesReply, error)
 	mustEmbedUnimplementedRoomServiceServer()
 }
 
@@ -268,6 +298,12 @@ func (UnimplementedRoomServiceServer) ListUserRooms(context.Context, *ListUserRo
 }
 func (UnimplementedRoomServiceServer) ListAllRooms(context.Context, *ListAllRoomsRequest) (*ListAllRoomsReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListAllRooms not implemented")
+}
+func (UnimplementedRoomServiceServer) SendMessage(context.Context, *SendMessageRequest) (*SendMessageReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method SendMessage not implemented")
+}
+func (UnimplementedRoomServiceServer) GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetMessages not implemented")
 }
 func (UnimplementedRoomServiceServer) mustEmbedUnimplementedRoomServiceServer() {}
 func (UnimplementedRoomServiceServer) testEmbeddedByValue()                     {}
@@ -506,6 +542,42 @@ func _RoomService_ListAllRooms_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RoomService_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoomServiceServer).SendMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoomService_SendMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoomServiceServer).SendMessage(ctx, req.(*SendMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RoomService_GetMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoomServiceServer).GetMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoomService_GetMessages_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoomServiceServer).GetMessages(ctx, req.(*GetMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RoomService_ServiceDesc is the grpc.ServiceDesc for RoomService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -560,6 +632,14 @@ var RoomService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAllRooms",
 			Handler:    _RoomService_ListAllRooms_Handler,
+		},
+		{
+			MethodName: "SendMessage",
+			Handler:    _RoomService_SendMessage_Handler,
+		},
+		{
+			MethodName: "GetMessages",
+			Handler:    _RoomService_GetMessages_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

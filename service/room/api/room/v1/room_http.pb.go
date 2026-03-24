@@ -21,6 +21,7 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationRoomServiceCreateRoom = "/room.v1.RoomService/CreateRoom"
 const OperationRoomServiceDeleteRoom = "/room.v1.RoomService/DeleteRoom"
+const OperationRoomServiceGetMessages = "/room.v1.RoomService/GetMessages"
 const OperationRoomServiceGetRoom = "/room.v1.RoomService/GetRoom"
 const OperationRoomServiceJoinRoom = "/room.v1.RoomService/JoinRoom"
 const OperationRoomServiceKickMember = "/room.v1.RoomService/KickMember"
@@ -29,6 +30,7 @@ const OperationRoomServiceListAllRooms = "/room.v1.RoomService/ListAllRooms"
 const OperationRoomServiceListMembers = "/room.v1.RoomService/ListMembers"
 const OperationRoomServiceListUserRooms = "/room.v1.RoomService/ListUserRooms"
 const OperationRoomServiceMuteMember = "/room.v1.RoomService/MuteMember"
+const OperationRoomServiceSendMessage = "/room.v1.RoomService/SendMessage"
 const OperationRoomServiceUpdateMemberRole = "/room.v1.RoomService/UpdateMemberRole"
 const OperationRoomServiceUpdateRoom = "/room.v1.RoomService/UpdateRoom"
 
@@ -37,6 +39,8 @@ type RoomServiceHTTPServer interface {
 	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomReply, error)
 	// DeleteRoom 删除房间
 	DeleteRoom(context.Context, *DeleteRoomRequest) (*DeleteRoomReply, error)
+	// GetMessages 获取消息历史
+	GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesReply, error)
 	// GetRoom 获取房间信息
 	GetRoom(context.Context, *GetRoomRequest) (*GetRoomReply, error)
 	// JoinRoom 加入房间
@@ -53,6 +57,8 @@ type RoomServiceHTTPServer interface {
 	ListUserRooms(context.Context, *ListUserRoomsRequest) (*ListUserRoomsReply, error)
 	// MuteMember 禁言/解禁成员
 	MuteMember(context.Context, *MuteMemberRequest) (*MuteMemberReply, error)
+	// SendMessage 发送消息
+	SendMessage(context.Context, *SendMessageRequest) (*SendMessageReply, error)
 	// UpdateMemberRole 更新成员角色
 	UpdateMemberRole(context.Context, *UpdateMemberRoleRequest) (*UpdateMemberRoleReply, error)
 	// UpdateRoom 更新房间信息
@@ -73,6 +79,8 @@ func RegisterRoomServiceHTTPServer(s *http.Server, srv RoomServiceHTTPServer) {
 	r.PUT("/v1/rooms/{room_id}/members/{user_id}/mute", _RoomService_MuteMember0_HTTP_Handler(srv))
 	r.GET("/v1/users/{user_id}/rooms", _RoomService_ListUserRooms0_HTTP_Handler(srv))
 	r.GET("/v1/rooms", _RoomService_ListAllRooms0_HTTP_Handler(srv))
+	r.POST("/v1/rooms/{room_id}/messages", _RoomService_SendMessage0_HTTP_Handler(srv))
+	r.GET("/v1/rooms/{room_id}/messages", _RoomService_GetMessages0_HTTP_Handler(srv))
 }
 
 func _RoomService_CreateRoom0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx http.Context) error {
@@ -351,11 +359,60 @@ func _RoomService_ListAllRooms0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx
 	}
 }
 
+func _RoomService_SendMessage0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SendMessageRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoomServiceSendMessage)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SendMessage(ctx, req.(*SendMessageRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SendMessageReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _RoomService_GetMessages0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMessagesRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoomServiceGetMessages)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMessages(ctx, req.(*GetMessagesRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetMessagesReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type RoomServiceHTTPClient interface {
 	// CreateRoom 创建房间
 	CreateRoom(ctx context.Context, req *CreateRoomRequest, opts ...http.CallOption) (rsp *CreateRoomReply, err error)
 	// DeleteRoom 删除房间
 	DeleteRoom(ctx context.Context, req *DeleteRoomRequest, opts ...http.CallOption) (rsp *DeleteRoomReply, err error)
+	// GetMessages 获取消息历史
+	GetMessages(ctx context.Context, req *GetMessagesRequest, opts ...http.CallOption) (rsp *GetMessagesReply, err error)
 	// GetRoom 获取房间信息
 	GetRoom(ctx context.Context, req *GetRoomRequest, opts ...http.CallOption) (rsp *GetRoomReply, err error)
 	// JoinRoom 加入房间
@@ -372,6 +429,8 @@ type RoomServiceHTTPClient interface {
 	ListUserRooms(ctx context.Context, req *ListUserRoomsRequest, opts ...http.CallOption) (rsp *ListUserRoomsReply, err error)
 	// MuteMember 禁言/解禁成员
 	MuteMember(ctx context.Context, req *MuteMemberRequest, opts ...http.CallOption) (rsp *MuteMemberReply, err error)
+	// SendMessage 发送消息
+	SendMessage(ctx context.Context, req *SendMessageRequest, opts ...http.CallOption) (rsp *SendMessageReply, err error)
 	// UpdateMemberRole 更新成员角色
 	UpdateMemberRole(ctx context.Context, req *UpdateMemberRoleRequest, opts ...http.CallOption) (rsp *UpdateMemberRoleReply, err error)
 	// UpdateRoom 更新房间信息
@@ -408,6 +467,20 @@ func (c *RoomServiceHTTPClientImpl) DeleteRoom(ctx context.Context, in *DeleteRo
 	opts = append(opts, http.Operation(OperationRoomServiceDeleteRoom))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetMessages 获取消息历史
+func (c *RoomServiceHTTPClientImpl) GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...http.CallOption) (*GetMessagesReply, error) {
+	var out GetMessagesReply
+	pattern := "/v1/rooms/{room_id}/messages"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationRoomServiceGetMessages))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -520,6 +593,20 @@ func (c *RoomServiceHTTPClientImpl) MuteMember(ctx context.Context, in *MuteMemb
 	opts = append(opts, http.Operation(OperationRoomServiceMuteMember))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SendMessage 发送消息
+func (c *RoomServiceHTTPClientImpl) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...http.CallOption) (*SendMessageReply, error) {
+	var out SendMessageReply
+	pattern := "/v1/rooms/{room_id}/messages"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationRoomServiceSendMessage))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
