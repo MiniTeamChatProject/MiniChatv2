@@ -102,48 +102,69 @@ make build
 # 检查 HTTP 服务
 curl http://localhost:8000
 
-# 检查 OpenAPI 文档
-curl http://localhost:8000/q/openapi.yaml
+# 检查服务列表 API
+curl http://localhost:8000/q/services
 ```
 
 ---
 
 ## API 文档 (Swagger UI)
 
-### 访问 Swagger UI
+### 方式一：在线 Swagger Editor（推荐）
 
-服务启动后，可以通过以下方式访问 API 文档：
+1. **获取 OpenAPI 文档**：
 
-#### 方式一：在线 Swagger Editor
+项目根目录已生成 `openapi.yaml` 文件，包含完整的 API 定义。
 
-1. 获取 OpenAPI 文档：
+2. **访问在线 Swagger Editor**：
+
+   打开浏览器访问：https://editor.swagger.io/
+
+3. **导入文档**：
+
+   - 方式 A：复制 `openapi.yaml` 的内容并粘贴到编辑器
+   - 方式 B：直接拖拽 `openapi.yaml` 文件到编辑器页面
+
+4. **浏览和测试 API**：
+
+   - 左侧查看所有 API 端点
+   - 点击任意端点查看详细信息
+   - 点击 "Try it out" 按钮在线测试
+
+### 方式二：本地 Swagger UI
+
+使用 Docker 运行 Swagger UI：
+
 ```bash
-curl http://localhost:8000/q/openapi.yaml -o openapi.yaml
+# 在项目根目录运行
+docker run -p 8080:8080 \
+  -e SWAGGER_JSON=/openapi.yaml \
+  -v $(pwd)/openapi.yaml:/openapi.yaml \
+  swaggerapi/swagger-ui
 ```
 
-2. 访问 [Swagger Editor](https://editor.swagger.io/)
-3. 将 `openapi.yaml` 内容复制粘贴到编辑器中
+然后访问：http://localhost:8080
 
-#### 方式二：本地 Swagger UI（推荐）
+### 方式三：使用 Postman/Insomnia
 
-服务启动后，直接在浏览器中访问：
+1. 下载项目中的 `openapi.yaml` 文件
+2. 打开 Postman/Insomnia
+3. 选择 Import → 选择 `openapi.yaml`
 
-**http://localhost:8000/q/**
+### 方式四：服务发现 API
 
-这是最简单的方式，无需额外配置。Swagger UI 已内置集成，支持：
-- 查看所有 API 文档
-- 在浏览器中直接测试 API
-- 查看请求/响应示例
+服务提供了服务发现端点（仅 JSON 数据，无 UI）：
 
-#### 方式三：使用第三方工具
+```bash
+# 获取所有服务列表
+curl http://localhost:8000/q/services
 
-**使用 Postman:**
-1. 生成 OpenAPI 文档：`curl http://localhost:8000/q/openapi.yaml -o openapi.yaml`
-2. 打开 Postman → Import → 选择 `openapi.yaml`
-
-**使用 Insomnia:**
-1. 下载 OpenAPI 文档
-2. Insomnia → Import → 选择文件
+# 返回示例：
+# {
+#   "services": ["room.v1.RoomService", ...],
+#   "methods": ["/room.v1.RoomService/CreateRoom", ...]
+# }
+```
 
 ---
 
@@ -460,7 +481,9 @@ kill -9 <PID>
 
 **问题**: Swagger UI 未配置
 
-**解决**: 参考上方 "Swagger UI" 配置章节
+**解决**:
+- 使用在线 Swagger Editor: https://editor.swagger.io/
+- 导入项目根目录的 `openapi.yaml` 文件
 
 ---
 
