@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Go room service** built with the [Kratos framework](https://github.com/go-kratos/kratos) — a Go microservices framework. The project follows clean architecture with dependency injection via Wire, using **GORM v2** for database access and **PostgreSQL** for persistence.
+This is a **Go room service** built with the [Kratos framework](https://github.com/go-kratos/kratos) — a Go microservices framework. The project follows clean architecture with dependency injection via Wire, using **GORM v1.25.12** for database access and **PostgreSQL** for persistence.
 
 ## Common Commands
 
@@ -139,5 +139,49 @@ The codebase follows Kratos's clean architecture pattern with four layers:
 - Import `openapi.yaml` into Postman/Insomnia for testing
 
 ### User Authentication
-- Currently **hardcoded** as `user_id = 1` in service layer
-- TODO: Integrate JWT/context to extract real user_id
+- **User ID extraction**: Middleware extracts `X-User-ID` from request headers
+- **Default fallback**: Development environment uses `user_id = 1` if not provided
+
+### Critical Bug Fixes (2026-03-25)
+
+#### 1. Join/Leave Room Logic
+- **Issue**: LeaveRoom was deleting member records instead of updating status
+- **Fix**: `LeaveRoom` now only updates status to `Left` (member stays in group)
+- **New API**: Added `QuitRoom` endpoint to completely remove member from group
+- **Database**: `(room_id, user_id)` unique index exists, so rejoining requires special handling
+
+**Behavior Changes**:
+| Operation | Old Behavior | New Behavior |
+|-----------|-------------|--------------|
+| JoinRoom | Created new record or error if exists | Creates new OR updates from Left→Normal |
+| LeaveRoom | Deleted member record | Updates status to Left (keeps record) |
+| QuitRoom | (N/A) | Deletes member record |
+
+#### 2. WebSocket Context Issue
+- **Issue**: WebSocket clients used HTTP request context (canceled after upgrade)
+- **Fix**: Each WebSocket client now has its own independent context
+- **Error**: "context canceled" when sending messages
+
+#### 3. Message Username Missing
+- **Issue**: Backend API returns camelCase fields, frontend expects snake_case
+- **Fix**: Frontend implements automatic field format conversion
+- **Username**: Display user's nickname instead of username
+
+### Member Status Lifecycle
+
+```
+New User → JoinRoom → status = Normal (1)
+                    ↓
+                LeaveRoom → status = Left (3) [Record kept]
+                    ↓
+                JoinRoom → status = Normal (1) [Reuses record]
+                    ↓
+                QuitRoom  → Record deleted
+```
+
+### Frontend Integration Notes
+
+1. **Field Format**: Backend returns camelCase (`roomId`), frontend expects snake_case (`room_id`)
+2. **Username Priority**: Use `nickname` > `username` > `User{userId}`
+3. **Message Deduplication**: Frontend tracks message IDs to prevent duplicates
+4. **Auto-reconnect**: WebSocket client supports up to 5 reconnection attempts

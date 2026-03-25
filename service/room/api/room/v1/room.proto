@@ -149,6 +149,16 @@ message LeaveRoomReply {
   bool success = 1;
 }
 
+// 退出群（删除成员）请求
+message QuitRoomRequest {
+  int64 room_id = 1;
+}
+
+// 退出群（删除成员）响应
+message QuitRoomReply {
+  bool success = 1;
+}
+
 // 获取成员列表请求
 message ListMembersRequest {
   int64 room_id = 1;
@@ -301,6 +311,14 @@ service RoomService {
   rpc LeaveRoom (LeaveRoomRequest) returns (LeaveRoomReply) {
     option (google.api.http) = {
       post: "/v1/rooms/{room_id}/leave"
+      body: "*"
+    };
+  }
+
+  // 退出群（删除成员记录）
+  rpc QuitRoom (QuitRoomRequest) returns (QuitRoomReply) {
+    option (google.api.http) = {
+      post: "/v1/rooms/{room_id}/quit"
       body: "*"
     };
   }

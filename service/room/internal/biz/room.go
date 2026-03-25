@@ -86,9 +86,11 @@ type RoomMember struct {
 // RoomMemberRepository 房间成员仓储接口
 type RoomMemberRepository interface {
 	Create(ctx context.Context, member *RoomMember) (*RoomMember, error)
+	JoinOrCreate(ctx context.Context, roomID, userID int64, role MemberRole) (*RoomMember, error)
 	Get(ctx context.Context, roomID, userID int64) (*RoomMember, error)
 	Update(ctx context.Context, member *RoomMember) (*RoomMember, error)
 	Delete(ctx context.Context, roomID, userID int64) error
+	SetLeftStatus(ctx context.Context, roomID, userID int64) error
 	List(ctx context.Context, roomID int64, limit, offset int) ([]*RoomMember, int, error)
 	UpdateRole(ctx context.Context, roomID, userID int64, role MemberRole) error
 	UpdateMute(ctx context.Context, roomID, userID int64, muteUntil *time.Time) error

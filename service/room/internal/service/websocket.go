@@ -24,13 +24,15 @@ type WebSocketMessage struct {
 
 // WebSocketClient WebSocket 客户端
 type WebSocketClient struct {
-	id     string
-	roomID int64
-	userID int64
-	conn   *websocket.Conn
-	send   chan *WebSocketMessage
-	hub    *WebSocketHub
-	ctx    context.Context
+	id       string
+	roomID   int64
+	userID   int64
+	username string
+	conn     *websocket.Conn
+	send     chan *WebSocketMessage
+	hub      *WebSocketHub
+	ctx      context.Context
+	cancel   context.CancelFunc
 }
 
 // WebSocketHub WebSocket 连接管理中心
@@ -112,6 +114,10 @@ func (h *WebSocketHub) unregisterClient(client *WebSocketClient) {
 		if clients[client] {
 			delete(clients, client)
 			close(client.send)
+			// 取消 context
+			if client.cancel != nil {
+				client.cancel()
+			}
 			h.log.Infof("Client %s left room %d", client.id, client.roomID)
 		}
 		if len(clients) == 0 {
@@ -201,6 +207,12 @@ func (s *WebSocketService) HandleWebSocket(ctx http.Context) error {
 		s.log.Warnf("No valid user ID found, using default: %d", userID)
 	}
 
+	// 获取用户名（从 URL 参数）
+	username := ctx.Query().Get("username")
+	if username == "" {
+		username = fmt.Sprintf("User%d", userID) // 默认用户名
+	}
+
 	// 验证用户是房间成员
 	member, err := s.muc.Get(ctx, roomID, userID)
 	if err != nil {
@@ -217,15 +229,18 @@ func (s *WebSocketService) HandleWebSocket(ctx http.Context) error {
 		return err
 	}
 
-	// 创建客户端
+	// 创建客户端（使用独立的 context，不依赖 HTTP 请求的 context）
+	clientCtx, cancel := context.WithCancel(context.Background())
 	client := &WebSocketClient{
-		id:     fmt.Sprintf("%d-%d", userID, time.Now().UnixNano()),
-		roomID: roomID,
-		userID: userID,
-		conn:   conn,
-		send:   make(chan *WebSocketMessage, 256),
-		hub:    s.hub,
-		ctx:    ctx,
+		id:       fmt.Sprintf("%d-%d", userID, time.Now().UnixNano()),
+		roomID:   roomID,
+		userID:   userID,
+		username: username,
+		conn:     conn,
+		send:     make(chan *WebSocketMessage, 256),
+		hub:      s.hub,
+		ctx:      clientCtx,
+		cancel:   cancel,
 	}
 
 	// 注册客户端
@@ -320,6 +335,7 @@ func (ws *WebSocketService) handleChatMessage(client *WebSocketClient, msg *WebS
 				"id":         message.ID,
 				"room_id":    message.RoomID,
 				"user_id":    message.UserID,
+				"username":   client.username,
 				"content":    message.Content,
 				"type":       message.Type,
 				"created_at": message.CreatedAt.Unix(),

@@ -37,11 +37,63 @@ func (r *roomMemberRepo) Create(ctx context.Context, member *biz.RoomMember) (*b
 	return r.toBizMember(memberModel), nil
 }
 
+// JoinOrCreate 加入或创建成员（处理重新加入的情况）
+func (r *roomMemberRepo) JoinOrCreate(ctx context.Context, roomID, userID int64, role biz.MemberRole) (*biz.RoomMember, error) {
+	// 先查找是否存在该用户在该房间的记录（不管状态）
+	var existingModel model.RoomMember
+	err := r.data.db.WithContext(ctx).
+		Where("room_id = ? AND user_id = ?", roomID, userID).
+		First(&existingModel).Error
+
+	if err == nil {
+		// 找到记录，更新状态为正常
+		now := time.Now()
+		updates := map[string]interface{}{
+			"status":    model.MemberStatusNormal,
+			"joined_at": now,
+			"updated_at": now,
+		}
+		err = r.data.db.WithContext(ctx).Model(&model.RoomMember{}).
+			Where("room_id = ? AND user_id = ?", roomID, userID).
+			Updates(updates).Error
+		if err != nil {
+			return nil, err
+		}
+		// 重新获取更新后的记录
+		err = r.data.db.WithContext(ctx).
+			Where("room_id = ? AND user_id = ? AND status = ?", roomID, userID, model.MemberStatusNormal).
+			First(&existingModel).Error
+		if err != nil {
+			return nil, err
+		}
+		return r.toBizMember(&existingModel), nil
+	}
+
+	if err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	// 没找到记录，创建新成员
+	memberModel := &model.RoomMember{
+		RoomID:    roomID,
+		UserID:    userID,
+		Role:      model.MemberRole(role),
+		Status:    model.MemberStatusNormal,
+		JoinedAt:  time.Now(),
+	}
+
+	if err := r.data.db.WithContext(ctx).Create(memberModel).Error; err != nil {
+		return nil, err
+	}
+
+	return r.toBizMember(memberModel), nil
+}
+
 // Get 获取成员
 func (r *roomMemberRepo) Get(ctx context.Context, roomID, userID int64) (*biz.RoomMember, error) {
 	var memberModel model.RoomMember
 	err := r.data.db.WithContext(ctx).
-		Where("room_id = ? AND user_id = ?", roomID, userID).
+		Where("room_id = ? AND user_id = ? AND status = ?", roomID, userID, model.MemberStatusNormal).
 		First(&memberModel).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -73,11 +125,18 @@ func (r *roomMemberRepo) Update(ctx context.Context, member *biz.RoomMember) (*b
 	return r.Get(ctx, member.RoomID, member.UserID)
 }
 
-// Delete 删除成员
+// Delete 删除成员（退出群）
 func (r *roomMemberRepo) Delete(ctx context.Context, roomID, userID int64) error {
 	return r.data.db.WithContext(ctx).
 		Where("room_id = ? AND user_id = ?", roomID, userID).
 		Delete(&model.RoomMember{}).Error
+}
+
+// SetLeftStatus 设置离开状态（不删除记录）
+func (r *roomMemberRepo) SetLeftStatus(ctx context.Context, roomID, userID int64) error {
+	return r.data.db.WithContext(ctx).Model(&model.RoomMember{}).
+		Where("room_id = ? AND user_id = ?", roomID, userID).
+		Update("status", model.MemberStatusLeft).Error
 }
 
 // List 获取成员列表

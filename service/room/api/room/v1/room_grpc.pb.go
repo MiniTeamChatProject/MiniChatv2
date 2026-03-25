@@ -25,6 +25,7 @@ const (
 	RoomService_DeleteRoom_FullMethodName       = "/room.v1.RoomService/DeleteRoom"
 	RoomService_JoinRoom_FullMethodName         = "/room.v1.RoomService/JoinRoom"
 	RoomService_LeaveRoom_FullMethodName        = "/room.v1.RoomService/LeaveRoom"
+	RoomService_QuitRoom_FullMethodName         = "/room.v1.RoomService/QuitRoom"
 	RoomService_ListMembers_FullMethodName      = "/room.v1.RoomService/ListMembers"
 	RoomService_KickMember_FullMethodName       = "/room.v1.RoomService/KickMember"
 	RoomService_UpdateMemberRole_FullMethodName = "/room.v1.RoomService/UpdateMemberRole"
@@ -53,6 +54,8 @@ type RoomServiceClient interface {
 	JoinRoom(ctx context.Context, in *JoinRoomRequest, opts ...grpc.CallOption) (*JoinRoomReply, error)
 	// 退出房间
 	LeaveRoom(ctx context.Context, in *LeaveRoomRequest, opts ...grpc.CallOption) (*LeaveRoomReply, error)
+	// 退出群（删除成员记录）
+	QuitRoom(ctx context.Context, in *QuitRoomRequest, opts ...grpc.CallOption) (*QuitRoomReply, error)
 	// 获取房间成员列表
 	ListMembers(ctx context.Context, in *ListMembersRequest, opts ...grpc.CallOption) (*ListMembersReply, error)
 	// 踢出成员
@@ -133,6 +136,16 @@ func (c *roomServiceClient) LeaveRoom(ctx context.Context, in *LeaveRoomRequest,
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LeaveRoomReply)
 	err := c.cc.Invoke(ctx, RoomService_LeaveRoom_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *roomServiceClient) QuitRoom(ctx context.Context, in *QuitRoomRequest, opts ...grpc.CallOption) (*QuitRoomReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QuitRoomReply)
+	err := c.cc.Invoke(ctx, RoomService_QuitRoom_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -237,6 +250,8 @@ type RoomServiceServer interface {
 	JoinRoom(context.Context, *JoinRoomRequest) (*JoinRoomReply, error)
 	// 退出房间
 	LeaveRoom(context.Context, *LeaveRoomRequest) (*LeaveRoomReply, error)
+	// 退出群（删除成员记录）
+	QuitRoom(context.Context, *QuitRoomRequest) (*QuitRoomReply, error)
 	// 获取房间成员列表
 	ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error)
 	// 踢出成员
@@ -280,6 +295,9 @@ func (UnimplementedRoomServiceServer) JoinRoom(context.Context, *JoinRoomRequest
 }
 func (UnimplementedRoomServiceServer) LeaveRoom(context.Context, *LeaveRoomRequest) (*LeaveRoomReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method LeaveRoom not implemented")
+}
+func (UnimplementedRoomServiceServer) QuitRoom(context.Context, *QuitRoomRequest) (*QuitRoomReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method QuitRoom not implemented")
 }
 func (UnimplementedRoomServiceServer) ListMembers(context.Context, *ListMembersRequest) (*ListMembersReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListMembers not implemented")
@@ -430,6 +448,24 @@ func _RoomService_LeaveRoom_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RoomServiceServer).LeaveRoom(ctx, req.(*LeaveRoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RoomService_QuitRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuitRoomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RoomServiceServer).QuitRoom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RoomService_QuitRoom_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RoomServiceServer).QuitRoom(ctx, req.(*QuitRoomRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -608,6 +644,10 @@ var RoomService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "LeaveRoom",
 			Handler:    _RoomService_LeaveRoom_Handler,
+		},
+		{
+			MethodName: "QuitRoom",
+			Handler:    _RoomService_QuitRoom_Handler,
 		},
 		{
 			MethodName: "ListMembers",

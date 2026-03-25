@@ -153,6 +153,24 @@ func (s *RoomService) LeaveRoom(ctx context.Context, req *v1.LeaveRoomRequest) (
 	}, nil
 }
 
+// QuitRoom 退出群（删除成员记录）
+func (s *RoomService) QuitRoom(ctx context.Context, req *v1.QuitRoomRequest) (*v1.QuitRoomReply, error) {
+	// 从 context 中获取 user_id
+	userID := middleware.GetUserIDFromContext(ctx)
+	if userID == 0 {
+		return nil, errors.New("unauthorized: user ID not found in context")
+	}
+
+	err := s.muc.Quit(ctx, req.RoomId, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.QuitRoomReply{
+		Success: true,
+	}, nil
+}
+
 // ListMembers 获取成员列表
 func (s *RoomService) ListMembers(ctx context.Context, req *v1.ListMembersRequest) (*v1.ListMembersReply, error) {
 	page := int(req.Page)

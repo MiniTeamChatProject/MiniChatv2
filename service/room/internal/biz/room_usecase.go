@@ -177,26 +177,28 @@ func (uc *RoomMemberUsecase) Join(ctx context.Context, roomID, userID int64) (*R
 		return nil, err
 	}
 
-	// 检查是否已加入
-	_, err := uc.memberRepo.Get(ctx, roomID, userID)
+	// 检查是否已经是正常状态的成员
+	existing, err := uc.memberRepo.Get(ctx, roomID, userID)
 	if err == nil {
-		return nil, ErrRoomAlreadyJoined
+		// 已经是正常状态的成员
+		return existing, ErrRoomAlreadyJoined
 	}
 
-	member := &RoomMember{
-		RoomID:    roomID,
-		UserID:    userID,
-		Role:      RoleMember,
-		Status:    MemberStatusNormal,
-		JoinedAt:  time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
-	return uc.memberRepo.Create(ctx, member)
+	// 使用 JoinOrCreate 处理加入或重新加入
+	return uc.memberRepo.JoinOrCreate(ctx, roomID, userID, RoleMember)
 }
 
-// Leave 退出房间
+// Leave 离开房间（不删除记录，只更新状态为 Left）
 func (uc *RoomMemberUsecase) Leave(ctx context.Context, roomID, userID int64) error {
+	_, err := uc.memberRepo.Get(ctx, roomID, userID)
+	if err != nil {
+		return ErrMemberNotFound
+	}
+	return uc.memberRepo.SetLeftStatus(ctx, roomID, userID)
+}
+
+// Quit 退出群（删除成员记录）
+func (uc *RoomMemberUsecase) Quit(ctx context.Context, roomID, userID int64) error {
 	_, err := uc.memberRepo.Get(ctx, roomID, userID)
 	if err != nil {
 		return ErrMemberNotFound

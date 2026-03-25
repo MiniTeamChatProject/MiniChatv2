@@ -30,6 +30,7 @@ const OperationRoomServiceListAllRooms = "/room.v1.RoomService/ListAllRooms"
 const OperationRoomServiceListMembers = "/room.v1.RoomService/ListMembers"
 const OperationRoomServiceListUserRooms = "/room.v1.RoomService/ListUserRooms"
 const OperationRoomServiceMuteMember = "/room.v1.RoomService/MuteMember"
+const OperationRoomServiceQuitRoom = "/room.v1.RoomService/QuitRoom"
 const OperationRoomServiceSendMessage = "/room.v1.RoomService/SendMessage"
 const OperationRoomServiceUpdateMemberRole = "/room.v1.RoomService/UpdateMemberRole"
 const OperationRoomServiceUpdateRoom = "/room.v1.RoomService/UpdateRoom"
@@ -57,6 +58,8 @@ type RoomServiceHTTPServer interface {
 	ListUserRooms(context.Context, *ListUserRoomsRequest) (*ListUserRoomsReply, error)
 	// MuteMember 禁言/解禁成员
 	MuteMember(context.Context, *MuteMemberRequest) (*MuteMemberReply, error)
+	// QuitRoom 退出群（删除成员记录）
+	QuitRoom(context.Context, *QuitRoomRequest) (*QuitRoomReply, error)
 	// SendMessage 发送消息
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageReply, error)
 	// UpdateMemberRole 更新成员角色
@@ -73,6 +76,7 @@ func RegisterRoomServiceHTTPServer(s *http.Server, srv RoomServiceHTTPServer) {
 	r.DELETE("/v1/rooms/{id}", _RoomService_DeleteRoom0_HTTP_Handler(srv))
 	r.POST("/v1/rooms/{room_id}/join", _RoomService_JoinRoom0_HTTP_Handler(srv))
 	r.POST("/v1/rooms/{room_id}/leave", _RoomService_LeaveRoom0_HTTP_Handler(srv))
+	r.POST("/v1/rooms/{room_id}/quit", _RoomService_QuitRoom0_HTTP_Handler(srv))
 	r.GET("/v1/rooms/{room_id}/members", _RoomService_ListMembers0_HTTP_Handler(srv))
 	r.DELETE("/v1/rooms/{room_id}/members/{user_id}", _RoomService_KickMember0_HTTP_Handler(srv))
 	r.PUT("/v1/rooms/{room_id}/members/{user_id}/role", _RoomService_UpdateMemberRole0_HTTP_Handler(srv))
@@ -220,6 +224,31 @@ func _RoomService_LeaveRoom0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx ht
 			return err
 		}
 		reply := out.(*LeaveRoomReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _RoomService_QuitRoom0_HTTP_Handler(srv RoomServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in QuitRoomRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationRoomServiceQuitRoom)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.QuitRoom(ctx, req.(*QuitRoomRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*QuitRoomReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -429,6 +458,8 @@ type RoomServiceHTTPClient interface {
 	ListUserRooms(ctx context.Context, req *ListUserRoomsRequest, opts ...http.CallOption) (rsp *ListUserRoomsReply, err error)
 	// MuteMember 禁言/解禁成员
 	MuteMember(ctx context.Context, req *MuteMemberRequest, opts ...http.CallOption) (rsp *MuteMemberReply, err error)
+	// QuitRoom 退出群（删除成员记录）
+	QuitRoom(ctx context.Context, req *QuitRoomRequest, opts ...http.CallOption) (rsp *QuitRoomReply, err error)
 	// SendMessage 发送消息
 	SendMessage(ctx context.Context, req *SendMessageRequest, opts ...http.CallOption) (rsp *SendMessageReply, err error)
 	// UpdateMemberRole 更新成员角色
@@ -593,6 +624,20 @@ func (c *RoomServiceHTTPClientImpl) MuteMember(ctx context.Context, in *MuteMemb
 	opts = append(opts, http.Operation(OperationRoomServiceMuteMember))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// QuitRoom 退出群（删除成员记录）
+func (c *RoomServiceHTTPClientImpl) QuitRoom(ctx context.Context, in *QuitRoomRequest, opts ...http.CallOption) (*QuitRoomReply, error) {
+	var out QuitRoomReply
+	pattern := "/v1/rooms/{room_id}/quit"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationRoomServiceQuitRoom))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
